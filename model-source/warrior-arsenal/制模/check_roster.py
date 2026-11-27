@@ -6,7 +6,8 @@ import numpy as np
 from roster import *
 
 def validate():
-    game=Path(sys.argv[1]) if len(sys.argv)>1 else Path('D:/垃圾桶/PCL 正式版 2.9.3/.minecraft/versions/元素觉醒1.4.3-魔改版-20260915')
+    if len(sys.argv)!=2:raise SystemExit('Usage: python check_roster.py GAME_DIR')
+    game=Path(sys.argv[1])
     counts=Counter();cost={};texture_set=set()
     with ZipFile(game/'mods/tnc-1.0.0.jar') as z:
         def exists(ref):

@@ -8,7 +8,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = Path(os.environ.get("TNC_WEAPON_SOURCE", Path.home()/".codex/worktrees/skyhaven-team-sync/TN-C_MC-magic-s-world"))/"src/main/resources/assets/tnc"
+SOURCE = Path(os.environ.get("TNC_WEAPON_SOURCE", Path(__file__).resolve().parents[3]))/"src/main/resources/assets/tnc"
 OUT = ROOT/"资源包/assets/tnc"
 SIDES = ("down","up","north","south","east","west")
 # Blade engraving takes a full 256 square. Narrow metal edges, gems and hafts share the other half.

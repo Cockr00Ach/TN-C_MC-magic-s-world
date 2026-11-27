@@ -5,7 +5,7 @@ import json,os
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
 PACK=ROOT/'资源包'
-REPO=Path(os.environ.get('TNC_WEAPON_REPO',Path.home()/'.codex/worktrees/skyhaven-team-sync/TN-C_MC-magic-s-world'))
+REPO=Path(os.environ.get('TNC_WEAPON_REPO',Path(__file__).resolve().parents[3]))
 RES=REPO/'src/main/resources'
 FAMILIES={'longswords':'长剑','greatswords':'重剑','hammers':'战锤','spears':'长枪','longbows':'战弓'}
 ZH=json.loads((RES/'assets/tnc/lang/zh_cn.json').read_bytes())

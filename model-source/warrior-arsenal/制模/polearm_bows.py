@@ -3,6 +3,7 @@ A cut metal profile is sculpted once in its actual model plane. Narrow inlays,
 engraving and fibres live on paint, not on stacked decorative cubes.
 """
 from pathlib import Path
+import os
 import json, math
 import numpy as np
 from PIL import Image,ImageDraw
@@ -10,7 +11,7 @@ from scipy.ndimage import distance_transform_edt
 from scipy.interpolate import PchipInterpolator
 
 ROOT=Path(__file__).resolve().parents[1]
-REPO=Path.home()/'.codex/worktrees/skyhaven-team-sync/TN-C_MC-magic-s-world'
+REPO=Path(os.environ.get('TNC_WEAPON_REPO', Path(__file__).resolve().parents[3]))
 SOURCE=REPO/'src/main/resources/assets/tnc'
 PACK=ROOT/'资源包/assets/tnc'
 MODELS=PACK/'models/item'
