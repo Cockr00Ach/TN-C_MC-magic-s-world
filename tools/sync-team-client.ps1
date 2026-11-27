@@ -90,6 +90,30 @@ function Sync-ModernFix([string]$dir) {
     if ($got.Count -ne 1 -or $got[0].Value.Trim() -ne $key) { throw "ModernFix verification failed: $file" }
 }
 
+function Move-OldWarriorOverlays([string]$dir) {
+    $overlays = @{
+        'tnc-warrior-arsenal.zip' = @(
+            '09028EE7C5242D379A5B313C4B7178194810E6A26F04DD7C8BEE8D0DA7C9C635',
+            '7E7C7176E26F6BFD4E17215361C4E2DB54B0A0D09D6B351A44D32B1CB6040045',
+            '1AB38A80322C89C30F76DD1BB3F3EF2D8E4C358F22EC4B40550C5F49E1260534'
+        )
+        'tnc-warrior-inventory-icons.zip' = @('482C57E6601C6C966DDD6262A5C162FE3796A18C00E3B0F3DFAD234185BD5A94')
+    }
+    foreach ($name in $overlays.Keys) {
+        $path = Join-Path $dir "config/openloader/resources/$name"
+        if (![IO.File]::Exists($path)) { continue }
+        if ((Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -notin $overlays[$name]) {
+            Write-Warning "A locally modified weapon overlay remains enabled: $name"
+            continue
+        }
+        if ($VerifyOnly) { throw "Obsolete team weapon overlay is still active: $path" }
+        $id = [guid]::NewGuid().ToString('N')
+        $backup = Join-Path $dir "backups/tnc-team/$id/$name"
+        [void][IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($backup))
+        [IO.File]::Move($path, $backup)
+    }
+}
+
 function Sync-AcademyQuestChapter([string]$dir) {
     if (!(Get-ChildItem -LiteralPath (Join-Path $dir 'mods') -Filter 'ftb-quests*.jar' -File)) { return }
     $source = Join-Path $TncRepoRoot 'questbook/ftbquests/chapters/tnc_sky_academy.snbt'
@@ -138,5 +162,6 @@ if (!$?) { throw 'Client install or verification failed.' }
 & (Join-Path $PSScriptRoot 'sync-team-wands.ps1') -GameDir $dir -VerifyOnly:$VerifyOnly
 if (!$?) { throw 'Team wand resource verification failed.' }
 Sync-ModernFix $dir
+Move-OldWarriorOverlays $dir
 Sync-AcademyQuestChapter $dir
 Write-Host "Verified team runtime $($lock.sourceCommit) SHA256 $($lock.entry.sha256), dependencies, wands, ModernFix and the Academy chapter if FTB Quests is installed."

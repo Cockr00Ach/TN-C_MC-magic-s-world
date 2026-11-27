@@ -69,6 +69,14 @@ def publish(jar):
         marker = "META-INF/tnc-team-build.json"
         if marker not in names or json.loads(archive.read(marker))["sourceTrees"] != trees:
             raise SystemExit("Build provenance does not match the current committed inputs. Rebuild with -PteamPublicRelease.")
+        for resource in (
+            "assets/tnc/models/item/sky_halberd.json",
+            "assets/tnc/models/item/arsenal_icons/ashwood_jian.json",
+            "assets/tnc/models/item/weapon_surfaces/ashwood_jian.obj",
+        ):
+            source = ROOT / "src/main/resources" / resource
+            if source.is_file() and (resource not in names or archive.read(resource) != source.read_bytes()):
+                raise SystemExit(f"Packaged asset differs from the repository: {resource}")
     tag = f"team-client-{commit[:12]}"
     # Publish the source snapshot without making an incomplete runtime lock visible on main.
     git("push", "origin", f"{commit}:refs/tags/{tag}")
