@@ -90,6 +90,30 @@ function Sync-ModernFix([string]$dir) {
     if ($got.Count -ne 1 -or $got[0].Value.Trim() -ne $key) { throw "ModernFix verification failed: $file" }
 }
 
+function Sync-AcademyQuestChapter([string]$dir) {
+    if (!(Get-ChildItem -LiteralPath (Join-Path $dir 'mods') -Filter 'ftb-quests*.jar' -File)) { return }
+    $source = Join-Path $TncRepoRoot 'questbook/ftbquests/chapters/tnc_sky_academy.snbt'
+    $target = Join-Path $dir 'config/ftbquests/quests/chapters/tnc_sky_academy.snbt'
+    $wanted = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash
+    $previous = if ([IO.File]::Exists($target)) { (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash }
+    if ($previous -eq $wanted) { return }
+    if ($VerifyOnly) { throw "Sky Academy quest chapter is out of sync: $target" }
+    [void][IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($target))
+    $id = [guid]::NewGuid().ToString('N')
+    $stage = "$target.$id.tmp"
+    try {
+        [IO.File]::Copy($source, $stage)
+        if ((Get-FileHash -LiteralPath $stage -Algorithm SHA256).Hash -ne $wanted) { throw "Staging failed: $target" }
+        if ($previous) {
+            $backup = Join-Path $dir "backups/tnc-team/$id/tnc_sky_academy.snbt"
+            [void][IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($backup))
+            if ((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash -ne $previous) { throw "Chapter changed during sync: $target" }
+            [IO.File]::Replace($stage, $target, $backup)
+        } else { [IO.File]::Move($stage, $target) }
+    } finally { if ([IO.File]::Exists($stage)) { [IO.File]::Delete($stage) } }
+    if ((Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash -ne $wanted) { throw "Quest chapter verification failed: $target" }
+}
+
 $lock = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $PSScriptRoot 'tnc-client-release.lock.json') | ConvertFrom-Json
 Confirm-ReleaseSource $lock
 $dir = Resolve-TeamInstance $GameDir
@@ -114,4 +138,5 @@ if (!$?) { throw 'Client install or verification failed.' }
 & (Join-Path $PSScriptRoot 'sync-team-wands.ps1') -GameDir $dir -VerifyOnly:$VerifyOnly
 if (!$?) { throw 'Team wand resource verification failed.' }
 Sync-ModernFix $dir
-Write-Host "Verified team runtime $($lock.sourceCommit) SHA256 $($lock.entry.sha256), dependencies, wands and ModernFix."
+Sync-AcademyQuestChapter $dir
+Write-Host "Verified team runtime $($lock.sourceCommit) SHA256 $($lock.entry.sha256), dependencies, wands, ModernFix and the Academy chapter if FTB Quests is installed."
