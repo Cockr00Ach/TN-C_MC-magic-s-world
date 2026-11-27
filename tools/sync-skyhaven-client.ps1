@@ -81,17 +81,33 @@ function Assert-GameClosed {
 
 # Resolve the short-lived CDN URL once per attempt; the lock always records the
 # permanent GitHub URL. Outside hosts and old clients keep the original route.
+# curl.exe does not read the Windows user proxy automatically.
+function Get-ReleaseCurlProxy([uri]$address) {
+    if ($env:HTTPS_PROXY -or $env:ALL_PROXY) { return }
+    try {
+        $systemProxy = [Net.WebRequest]::GetSystemWebProxy()
+        if ($systemProxy -and !$systemProxy.IsBypassed($address)) {
+            $proxy = $systemProxy.GetProxy($address)
+            if ($proxy -and $proxy -ne $address -and $proxy.Scheme -in 'http','https') { return $proxy.AbsoluteUri }
+        }
+    } catch {
+        # Let curl use its normal environment and direct connection when proxy discovery fails.
+    }
+}
 function Get-GitHubAsset($Entry, $Target) {
     $length = [long]$Entry.size
     $step = if ($length -gt 64MB) { 2MB } else { 512KB }
     $partDir = Join-Path (Join-Path $stateDir 'partial') $Entry.sha256
     [void][IO.Directory]::CreateDirectory($partDir)
     $url = $Entry.url
-    $redirect = & curl.exe --silent --head --ssl-revoke-best-effort --connect-timeout 10 --max-time 20 --output NUL --write-out '%{redirect_url}' "$($Entry.url)?tnc=$([DateTime]::UtcNow.Ticks)"
+    $headProxy = Get-ReleaseCurlProxy ([uri]$url)
+    $headOptions = if ($headProxy) { @('--proxy', $headProxy) } else { @() }
+    $redirect = & curl.exe @headOptions --silent --head --ssl-revoke-best-effort --connect-timeout 10 --max-time 20 --output NUL --write-out '%{redirect_url}' "$($Entry.url)?tnc=$([DateTime]::UtcNow.Ticks)"
     if ($LASTEXITCODE -eq 0 -and $redirect -cmatch '^https://release-assets\.githubusercontent\.com/[^"\s\\]+$') {
         $url = $redirect
     }
 
+    $rangeProxy = Get-ReleaseCurlProxy ([uri]$url)
     $pieces = [Collections.Generic.List[object]]::new()
     for ($first = 0L; $first -lt $length; $first += $step) {
         $last = [Math]::Min($first + $step - 1, $length - 1)
@@ -114,6 +130,7 @@ function Get-GitHubAsset($Entry, $Target) {
             [IO.File]::Delete((Join-Path $staging $delta))
             [IO.File]::Delete((Join-Path $staging $headers))
             if ($options.Count) { $options.Add('next') }
+            if ($rangeProxy) { $options.Add("proxy = `"$rangeProxy`"") }
             foreach ($line in @('location','fail','silent','show-error','ssl-revoke-best-effort','connect-timeout = 20','speed-limit = 1024','speed-time = 35','max-time = 120',
                                 "range = `"$($part.From)-$($part.Last)`"","dump-header = `"$headers`"","output = `"$delta`"","url = `"$url`"")) {
                 $options.Add($line)
