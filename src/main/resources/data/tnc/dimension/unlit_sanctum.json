@@ -1,0 +1,13 @@
+{
+  "type": "tnc:unlit_sanctum",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "tnc:rift_dungeons",
+      "features": false,
+      "lakes": false,
+      "structure_overrides": [],
+      "layers": [{"block": "minecraft:bedrock", "height": 1}]
+    }
+  }
+}

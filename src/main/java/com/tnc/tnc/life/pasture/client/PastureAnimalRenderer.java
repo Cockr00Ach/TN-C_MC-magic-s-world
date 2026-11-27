@@ -17,7 +17,7 @@ public final class PastureAnimalRenderer extends MobRenderer<PastureAnimal, Past
 
     public PastureAnimalRenderer(EntityRendererProvider.Context context, String species) {
         super(context, new PastureAnimalModel(context.bakeLayer(PastureGeometry.LAYERS.get(species)), species), shadow(species));
-        texture = ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/entity/pasture/" + species + ".png");
+        texture = ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/entity/pasture_sculpt/" + species + ".png");
         addLayer(new ResourceGlow(this, species));
     }
 
@@ -55,15 +55,15 @@ public final class PastureAnimalRenderer extends MobRenderer<PastureAnimal, Past
         ResourceGlow(PastureAnimalRenderer parent, String species) {
             super(parent);
             renderType = RenderType.eyes(ResourceLocation.fromNamespaceAndPath(TNMod.MODID,
-                    "textures/entity/pasture/" + species + "_glow.png"));
+                    "textures/entity/pasture_sculpt/" + species + "_glow.png"));
         }
         @Override public void render(PoseStack pose, MultiBufferSource buffers, int light, PastureAnimal animal,
                                      float limbSwing, float limbAmount, float partialTick, float age,
                                      float yaw, float pitch) {
             if (animal.isInvisible()) return;
             float strength = getParentModel().glowStrength();
-            getParentModel().renderToBuffer(pose, buffers.getBuffer(renderType), 0xF000F0,
-                    OverlayTexture.NO_OVERLAY, strength, strength, strength, 1.0F);
+            getParentModel().drawSkin(pose, buffers.getBuffer(renderType), 0xF000F0,
+                    OverlayTexture.NO_OVERLAY, strength, strength, strength, 1.0F, true);
         }
     }
 }

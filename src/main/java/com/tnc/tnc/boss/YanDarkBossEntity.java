@@ -1061,12 +1061,15 @@ public class YanDarkBossEntity extends Monster implements GeoEntity {
                     net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                     (int) Math.floor(x), (int) Math.floor(z));
             Vec3 spot = new Vec3(x, y, z);
-            if (level.noCollision(this, this.getBoundingBox().move(spot.subtract(this.position())))) {
+            if (allowsBlinkLanding(spot) && level.noCollision(this, this.getBoundingBox().move(spot.subtract(this.position())))) {
                 return spot;
             }
         }
         return null;
     }
+
+    /** Scripted encounters may narrow the range of the normal ground-seeking blink. */
+    protected boolean allowsBlinkLanding(Vec3 point) { return true; }
 
     /** 黑暗衍的"电花"＝ 黑雾为主 + 一点蓝电 ✓（亮蓝色 60 颗看着像普通雷法，不像他 ✗）。 */
     private void darkSparks(ServerLevel level, Vec3 at, int count) {

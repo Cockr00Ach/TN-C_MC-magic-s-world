@@ -21,6 +21,7 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -49,9 +50,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.HashMap;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Mod.EventBusSubscriber(modid = "tnc")
 public final class YanPrologue {
@@ -74,6 +78,8 @@ public final class YanPrologue {
         int age;
         boolean rewindAcknowledged;
         Vec3 executionPosition, defeatPosition;
+        final ArrayDeque<ChunkPos> upgrades = new ArrayDeque<>();
+        boolean chunksReady;
         BlockPos altar = YanSanctuaryLayout.BOSS;
         BlockPos entry = ENTRY;
         Scene(ServerPlayer player, ServerLevel arena) {
@@ -84,6 +90,8 @@ public final class YanPrologue {
     }
 
     static final class Actor extends YanDarkBossEntity {
+        private BlockPos stageCenter;
+        private Vec3 lastFooting;
         Actor(ServerLevel level, UUID owner) {
             super(TNNpcs.YAN_DARK.get(), level);
             getPersistentData().putUUID(ACTOR, owner);
@@ -91,6 +99,35 @@ public final class YanPrologue {
         @Override public boolean shouldBeSaved() { return false; }
         @Override protected boolean shouldDespawnInPeaceful() { return false; }
         @Override protected boolean ticksExecutionInAi() { return false; }
+
+        @Override protected boolean allowsBlinkLanding(Vec3 point) {
+            return stageCenter == null || YanOpeningAltar.floorPoint(point, stageCenter);
+        }
+
+        @Override public void move(MoverType type, Vec3 step) {
+            if (stageCenter != null) {
+                var destination = position().add(step);
+                var limited = YanOpeningAltar.limit(destination, stageCenter);
+                if (limited != destination) step = limited.subtract(position());
+            }
+            super.move(type, step);
+        }
+
+        void keepOnStage() {
+            if (stageCenter == null) return;
+            var point = position();
+            if (YanOpeningAltar.floorPoint(point, stageCenter) && level().noCollision(this)) lastFooting = point;
+            if (YanOpeningAltar.limit(point, stageCenter) == point
+                    && point.y >= YanOpeningAltar.FEET - .5 && point.y < YanOpeningAltar.FEET + 5) return;
+            getNavigation().stop();
+            var back = lastFooting;
+            if (back == null || !level().noCollision(this, getBoundingBox().move(back.subtract(point)))) {
+                back = Vec3.atBottomCenterOf(stageCenter.offset(0, 0, YanSanctuaryLayout.BOSS.getZ()));
+            }
+            teleportTo(back.x, back.y, back.z);
+            setDeltaMovement(Vec3.ZERO);
+            fallDistance = 0;
+        }
 
         boolean tryExecution() { return maybeStartExecution(); }
         void advanceExecution() { if (execTick() >= 0) tickExecution(); }
@@ -148,7 +185,7 @@ public final class YanPrologue {
         while (occupied(level, lane)) lane++;
         scene.entry = ENTRY.offset(lane * YanSanctuaryGenerator.LANE_WIDTH, 0, 0);
         scene.altar = YanSanctuaryLayout.BOSS.offset(lane * YanSanctuaryGenerator.LANE_WIDTH, 0, 0);
-        level.getChunkSource().addRegionTicket(ARENA_TICKET, new ChunkPos(scene.altar), 2, player.getUUID());
+        level.getChunkSource().addRegionTicket(ARENA_TICKET, new ChunkPos(scene.entry), 5, player.getUUID());
         SCENES.put(player.getUUID(), scene);
         return scene;
     }
@@ -174,30 +211,46 @@ public final class YanPrologue {
         scene.phase = Phase.LOADING;
         scene.age = 0;
         var server = scene.player.server;
-        // The altar and arrival are in separate chunks; request both without blocking the game thread.
-        var entry = scene.arena.getChunkSource().getChunkFuture(scene.entry.getX() >> 4, scene.entry.getZ() >> 4, ChunkStatus.FULL, true);
-        var altar = scene.arena.getChunkSource().getChunkFuture(scene.altar.getX() >> 4, scene.altar.getZ() >> 4, ChunkStatus.FULL, true);
-        entry.thenCombine(altar, (a, b) -> a.left().isPresent() && b.left().isPresent())
-                .whenCompleteAsync((ready, error) -> {
+        int laneX = scene.entry.getX(), edge = YanOpeningAltar.EDGE;
+        var futures = new ArrayList<CompletableFuture<Boolean>>();
+        for (int x = (laneX - edge) >> 4; x <= (laneX + edge) >> 4; x++) {
+            for (int z = -edge >> 4; z <= edge >> 4; z++) {
+                scene.upgrades.add(new ChunkPos(x, z));
+                futures.add(scene.arena.getChunkSource().getChunkFuture(x, z, ChunkStatus.FULL, true)
+                        .thenApply(result -> result.left().isPresent()));
+            }
+        }
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                .whenCompleteAsync((ignored, error) -> {
                     var player = scene.player;
                     if (SCENES.get(player.getUUID()) != scene || player.hasDisconnected() || scene.phase != Phase.LOADING) return;
-                    if (error != null || !Boolean.TRUE.equals(ready)) {
+                    if (error != null || futures.stream().anyMatch(f -> !f.join())) {
                         rewind(scene);
                         return;
                     }
-                    var point = Vec3.atBottomCenterOf(scene.entry);
-                    if (!scene.arena.noCollision(player, player.getBoundingBox().move(point.subtract(player.position())))) {
-                        rewind(scene);
-                        return;
-                    }
-                    scene.phase = Phase.ARRIVING;
-                    scene.age = 0;
-                    equip(player);
-                    player.teleportTo(scene.arena, point.x, point.y, point.z, 180, 0);
-                    player.setDeltaMovement(Vec3.ZERO);
-                    player.fallDistance = 0;
-                    YanPrologueNetwork.send(player, scene.token, YanPrologueNetwork.Stage.FIGHT);
+                    scene.chunksReady = true;
                 }, server);
+    }
+
+    private static void prepareArrival(Scene scene) {
+        if (!scene.chunksReady) return;
+        for (int i = 0; i < 2 && !scene.upgrades.isEmpty(); i++) {
+            YanOpeningAltar.upgradeChunk(scene.arena, scene.upgrades.remove(), scene.entry.getX());
+        }
+        if (!scene.upgrades.isEmpty()) return;
+        var player = scene.player;
+        var point = Vec3.atBottomCenterOf(scene.entry);
+        if (!scene.arena.noCollision(player, player.getBoundingBox().move(point.subtract(player.position())))) {
+            rewind(scene);
+            return;
+        }
+        scene.phase = Phase.ARRIVING;
+        scene.age = 0;
+        equip(player);
+        player.teleportTo(scene.arena, point.x, point.y, point.z, 180, 0);
+        player.setDeltaMovement(Vec3.ZERO);
+        player.fallDistance = 0;
+        YanPrologueNetwork.send(player, scene.token, YanPrologueNetwork.Stage.FIGHT);
     }
 
     static void startCombat(Scene scene) {
@@ -207,7 +260,9 @@ public final class YanPrologue {
         boss.moveTo(at.x, at.y, at.z, 0, 0);
         boss.getAttribute(Attributes.MAX_HEALTH).setBaseValue(80);
         boss.setHealth(boss.getMaxHealth());
-        boss.restrictTo(scene.altar, 30);
+        boss.stageCenter = new BlockPos(scene.entry.getX(), YanOpeningAltar.FEET, 0);
+        boss.lastFooting = at;
+        boss.restrictTo(boss.stageCenter, YanOpeningAltar.WALK_LIMIT);
         boss.setPersistenceRequired();
         scene.boss = boss;
         scene.phase = Phase.COMBAT;
@@ -217,7 +272,7 @@ public final class YanPrologue {
             return;
         }
         boss.setTarget(scene.player);
-        scene.player.displayClientMessage(Component.literal("序幕法杖已就绪。使用法术栏施放八个法术。"), true);
+        scene.player.displayClientMessage(Component.literal("序幕法杖已就绪。蹲下右击祭坛上的雷纹石，可提前进入回溯。"), false);
     }
 
     @SubscribeEvent
@@ -232,7 +287,8 @@ public final class YanPrologue {
             scene.age++;
             switch (scene.phase) {
                 case STORY -> { if (scene.age > 1800) loadArena(scene); }
-                case LOADING, ARRIVING -> { if (scene.age > 1800) rewind(scene); }
+                case LOADING -> { if (scene.age > 1800) rewind(scene); else prepareArrival(scene); }
+                case ARRIVING -> { if (scene.age > 1800) rewind(scene); }
                 case COMBAT -> tickFight(scene);
                 case DEFEAT -> {
                     if (scene.boss != null && !scene.boss.isRemoved()) scene.boss.advanceExecution();
@@ -255,9 +311,17 @@ public final class YanPrologue {
             rewind(scene);
             return;
         }
-        if (boss.execTick() < 0 && player.distanceToSqr(Vec3.atCenterOf(scene.entry)) > 54 * 54) {
+        boss.keepOnStage();
+        if (boss.execTick() < 0 && player.getY() < YanOpeningAltar.FLOOR - 6) {
             var at = Vec3.atBottomCenterOf(scene.entry);
             player.teleportTo(at.x, at.y, at.z);
+            player.fallDistance = 0;
+        }
+        // Keep distinct multiplayer encounters separated beyond either visible altar.
+        if (boss.execTick() < 0 && YanOpeningAltar.gauge(player.getX() - scene.entry.getX() - .5,
+                player.getZ() - .5) > YanSanctuaryGenerator.LANE_WIDTH / 2 - 16) {
+            rewind(scene);
+            return;
         }
         if (boss.getTarget() != player) boss.setTarget(player);
         if (boss.execTick() >= YanExecutionRules.AT_PLAYER && boss.execTick() <= YanExecutionRules.AT_IMPACT) {
@@ -296,6 +360,48 @@ public final class YanPrologue {
         holdPlayer(scene, scene.defeatPosition);
     }
 
+    @SubscribeEvent
+    public static void useRewindAltar(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        if (!event.getLevel().dimension().equals(WORLD) || !event.getEntity().isShiftKeyDown()
+                || !event.getLevel().getBlockState(event.getPos()).is(YanSanctuary.ALTAR)) return;
+        if (event.getEntity() instanceof ServerPlayer player) {
+            var scene = SCENES.get(player.getUUID());
+            if (scene == null) {
+                var record = JourneyData.get(player.server).player(player.getUUID());
+                recoverKit(player, record);
+                if (awaiting(player)) {
+                    begin(player);
+                } else {
+                    returnFromEmptyArena(player);
+                }
+            } else {
+                if (scene.phase != Phase.COMBAT
+                        || !event.getPos().equals(YanSanctuaryLayout.ALTAR.offset(scene.entry.getX(), 0, 0))) return;
+                rewind(scene);
+            }
+        }
+        event.setCancellationResult(net.minecraft.world.InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+        event.setCanceled(true);
+    }
+
+    private static void returnFromEmptyArena(ServerPlayer player) {
+        var home = player.server.getLevel(player.getRespawnDimension());
+        var bed = player.getRespawnPosition();
+        if (home != null && !home.dimension().equals(WORLD) && bed != null) {
+            var point = net.minecraft.world.entity.player.Player.findRespawnPositionAndUseSpawnBlock(home, bed,
+                    player.getRespawnAngle(), player.isRespawnForced(), true);
+            if (point.isPresent()) {
+                var pos = point.get();
+                player.teleportTo(home, pos.x, pos.y, pos.z, player.getRespawnAngle(), 0);
+                return;
+            }
+        }
+        var world = player.server.overworld();
+        var spawn = world.getHeightmapPos(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                world.getSharedSpawnPos());
+        player.teleportTo(world, spawn.getX() + .5, spawn.getY(), spawn.getZ() + .5, player.getYRot(), 0);
+    }
+
     private static void holdPlayer(Scene scene, Vec3 point) {
         var player = scene.player;
         if (player.level() != scene.arena) return;
@@ -331,13 +437,20 @@ public final class YanPrologue {
         data.setDirty();
         abandon(scene);
         YanPrologueNetwork.send(player, scene.token, YanPrologueNetwork.Stage.END);
+        if (player.level() == scene.arena && player.getPersistentData()
+                .getCompound(net.minecraft.world.entity.player.Player.PERSISTED_NBT_TAG).getBoolean("SkyhavenArrived")) {
+            returnFromEmptyArena(player);
+        }
         SkyhavenTravel.login(player);
     }
 
     static void abandon(Scene scene) {
         SCENES.remove(scene.player.getUUID(), scene);
-        scene.arena.getChunkSource().removeRegionTicket(ARENA_TICKET, new ChunkPos(scene.altar), 2, scene.player.getUUID());
-        if (scene.boss != null) scene.boss.discard();
+        scene.arena.getChunkSource().removeRegionTicket(ARENA_TICKET, new ChunkPos(scene.entry), 5, scene.player.getUUID());
+        if (scene.boss != null) {
+            com.tnc.tnc.boss.YanNailPuzzle.abandon(scene.arena, scene.boss);
+            scene.boss.discard();
+        }
         var area = new net.minecraft.world.phys.AABB(scene.entry).inflate(88, 64, 88);
         for (var entity : scene.arena.getEntitiesOfClass(net.minecraft.world.entity.Mob.class, area,
                 mob -> scene.player.getUUID().equals(summoner(mob)))) entity.discard();

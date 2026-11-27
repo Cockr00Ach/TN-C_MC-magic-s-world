@@ -22,22 +22,24 @@ public final class SkyAcademyWorld {
     private static final TicketType<ChunkPos> TICKET=TicketType.create("tnc_academy_build",Comparator.comparingLong(ChunkPos::toLong),40);
     private static final Map<MinecraftServer,Plan> PLANS=new WeakHashMap<>();
     private static final Map<MinecraftServer,Set<ChunkPos>> TICKETS=new WeakHashMap<>();
-    public static final Map<String,BlockPos> SITES=sites();
+    public static final Map<String,BlockPos> SITES=readSites("sites.json");
+    private static final Map<String,BlockPos> LEGACY_SITES=readSites("sites_legacy.json");
     private record Plan(List<BlockState> palette,List<int[]> tiles){}
     public static final class State extends SavedData {
         boolean enabled,done; int tile,cursor; String error="";
         static State get(ServerLevel l){return l.getDataStorage().computeIfAbsent(t->{var s=new State();s.enabled=t.getBoolean("Enabled");s.done=t.getBoolean("Done");/* Before entry, replay unfinished construction: SavedData can reach disk before a chunk. */s.tile=0;s.cursor=0;s.setDirty();return s;},()->{var s=new State();s.enabled=l.getGameTime()==0;s.setDirty();return s;},"tnc_sky_academy_v1");}
         public CompoundTag save(CompoundTag t){t.putBoolean("Enabled",enabled);t.putBoolean("Done",done);t.putInt("Tile",tile);t.putInt("Cursor",cursor);t.putString("Error",error);return t;}
     }
-    private static Map<String,BlockPos> sites(){
-        try(var in=SkyAcademyWorld.class.getResourceAsStream("/data/tnc/sky_academy/sites.json");var r=new InputStreamReader(Objects.requireNonNull(in),StandardCharsets.UTF_8)){
+    private static Map<String,BlockPos> readSites(String resource){
+        try(var in=SkyAcademyWorld.class.getResourceAsStream("/data/tnc/sky_academy/"+resource);var r=new InputStreamReader(Objects.requireNonNull(in),StandardCharsets.UTF_8)){
             var map=new LinkedHashMap<String,BlockPos>();JsonParser.parseReader(r).getAsJsonObject().entrySet().forEach(e->{var a=e.getValue().getAsJsonArray();map.put(e.getKey(),new BlockPos(a.get(0).getAsInt(),a.get(1).getAsInt(),a.get(2).getAsInt()));});return Map.copyOf(map);
         }catch(IOException e){throw new ExceptionInInitializerError(e);}
     }
     public static BlockPos origin(MinecraftServer s){return SkyIslandSavedData.get(com.tnc.tnc.world.SkyIslandWorlds.island(s)).anchorPos("ORIGIN");}
     /** Called by the island lifecycle, never inferred from a fleeting game-time value. */
     public static void beginFreshIsland(MinecraftServer s){var d=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(s));d.enabled=true;d.done=false;d.tile=d.cursor=0;d.error="";d.setDirty();}
-    public static BlockPos at(MinecraftServer s,String site){var o=origin(s);var p=SITES.get(site);return o==null||p==null?null:o.offset(p);}
+    public static Map<String,BlockPos> sites(MinecraftServer server){return LessonClearings.highlands(server) ? SITES : LEGACY_SITES;}
+    public static BlockPos at(MinecraftServer s,String site){var o=origin(s);var p=sites(s).get(site);return o==null||p==null?null:o.offset(p);}
     public static boolean available(MinecraftServer s){var d=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(s));return d.enabled&&d.done;}
     public static void enableIsolatedAudit(MinecraftServer s){if(!Boolean.getBoolean("tnc.skyAcademyAudit"))throw new IllegalStateException("Audit opt-in required");var d=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(s));if(!d.enabled){d.enabled=true;d.done=false;d.tile=d.cursor=0;d.error="";d.setDirty();}}
     public static boolean ready(MinecraftServer s){var d=State.get(com.tnc.tnc.world.SkyIslandWorlds.island(s));return !d.enabled||d.done;}

@@ -22,11 +22,6 @@ public final class RouteWildSpecimens {
         if(id.equals("warning_moss")&&state.hasProperty(age))state=state.setValue(age,3);
         return state;
     }
-    public static boolean place(ServerLevel level,BlockPos pos,String biome){
-        String id=biome.contains("hill")||biome.contains("peak")?"warning_moss"
-                :new String[]{"homeward_flower","mana_root","sky_vine"}[level.random.nextInt(3)];
-        return placeSpecimen(level,pos,id);
-    }
     static boolean placeSpecimen(ServerLevel level,BlockPos pos,String id){
         var block=ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath("tnc",id));
         if(block==null||block==Blocks.AIR)return false;

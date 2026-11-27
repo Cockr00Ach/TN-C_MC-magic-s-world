@@ -2,6 +2,8 @@ package com.tnc.tnc.life.botanical;
 
 import com.tnc.tnc.home.TownProtection;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,6 +33,24 @@ public final class BotanicalBlock extends BushBlock implements EntityBlock {
     public static final IntegerProperty AGE=IntegerProperty.create("age",0,3),MODE=IntegerProperty.create("mode",0,3);
     public static final net.minecraft.world.level.block.state.properties.BooleanProperty WILD=net.minecraft.world.level.block.state.properties.BooleanProperty.create("wild");
     public final BotanicalSpecies species;
+
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        if (state.getValue(AGE) < 3 || random.nextInt(4) != 0) return;
+        var particle = switch (species) {
+            case DAWN_DISK -> level.isDay() && level.getDayTime() % 24000 < 2300
+                    ? ParticleTypes.WAX_ON : null;
+            case STAR_DEW, WISH_PUFF -> level.isNight() ? ParticleTypes.GLOW : null;
+            case MIST_COTTON -> level.isRainingAt(pos.above()) ? ParticleTypes.CLOUD : null;
+            case HONEY_CLUSTER -> level.isDay() && !level.isRainingAt(pos.above())
+                    ? ParticleTypes.FALLING_NECTAR : null;
+            default -> null;
+        };
+        if (particle == null) return;
+        double x = pos.getX() + .23 + random.nextDouble() * .54;
+        double z = pos.getZ() + .23 + random.nextDouble() * .54;
+        level.addParticle(particle, x, pos.getY() + .78, z, .007, .012, -.004);
+    }
     public BotanicalBlock(BotanicalSpecies species){super(BlockBehaviour.Properties.copy(Blocks.FERN).offsetType(BlockBehaviour.OffsetType.NONE).noCollission().noOcclusion().lightLevel(s->s.getValue(AGE)==3&&(species==BotanicalSpecies.STAR_DEW||species==BotanicalSpecies.STAR_REST||species==BotanicalSpecies.WISH_PUFF)?3:0));this.species=species;registerDefaultState(stateDefinition.any().setValue(AGE,0).setValue(MODE,0).setValue(WILD,false));}
     @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext c){if(c.getLevel() instanceof net.minecraft.server.level.ServerLevel l&&!com.tnc.tnc.arcana.ArcanaRealms.powered(l,c.getClickedPos()))return null;return super.getStateForPlacement(c);}
     @Override public RenderShape getRenderShape(BlockState state){return RenderShape.ENTITYBLOCK_ANIMATED;}

@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.Mod;
 public final class PurityAmulet {
     private PurityAmulet(){}
     public static boolean equipped(LivingEntity entity){
+        if (com.tnc.tnc.dungeon.mirror.MirrorSilence.active(entity)) return false;
         var item=PurityAmuletRegistration.ITEM;
         return item!=null&&(entity.getItemBySlot(EquipmentSlot.OFFHAND).is(item)||PurityAccessoryBridge.equipped(entity,item));
     }

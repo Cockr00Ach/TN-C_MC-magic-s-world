@@ -170,7 +170,7 @@ public final class TNSkyfallEntity extends Entity {
         if (owner == null) {
             return null;
         }
-        ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
+        ServerPlayer player = com.tnc.tnc.dungeon.mirror.MirrorSpellHand.owner(level,owner);
         return player != null && player.level() == level ? player : null;
     }
 

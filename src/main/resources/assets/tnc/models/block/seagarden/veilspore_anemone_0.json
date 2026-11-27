@@ -1,0 +1,1 @@
+{"loader":"tnc:botanical_mesh","render_type":"minecraft:cutout","ambientocclusion":false,"glow_enabled":true,"textures":{"plant":"tnc:block/seagarden/veilspore_anemone","particle":"tnc:block/seagarden/veilspore_anemone"},"geometry":"tnc:seagarden_meshes/veilspore_anemone_0.json"}

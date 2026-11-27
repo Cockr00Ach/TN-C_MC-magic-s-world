@@ -1,0 +1,10 @@
+newmtl m0
+Ka 0 0 0
+Kd 1 1 1
+map_Kd tnc:item/weapon_surfaces/qimei_staff_body
+
+newmtl m1
+Ka 0 0 0
+Kd 1 1 1
+map_Kd tnc:item/arsenal_26/qimei_staff
+

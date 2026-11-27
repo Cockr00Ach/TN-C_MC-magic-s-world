@@ -18,7 +18,13 @@ public final class TownProtection {
         return (p.getX()>=120&&p.getX()<=402&&p.getZ()>=92&&p.getZ()<=432&&p.getY()>=80&&p.getY()<=180)
                 ||(p.getX()>=410&&p.getX()<=490&&p.getZ()>=260&&p.getZ()<=330&&p.getY()>=80&&p.getY()<=145);
     }
-    public static boolean denied(ServerPlayer p,BlockPos pos){return !p.isCreative()&&(com.tnc.tnc.skyacademy.AcademyLessons.trainingProtected(p,pos)||(town(p.serverLevel(),pos)||HousingService.plotAt(p.serverLevel(),pos)!=null||HousingService.isOwnedPosition(p.serverLevel(),pos))&&!HousingService.mayDecorate(p,pos));}
+    public static boolean denied(ServerPlayer p,BlockPos pos){
+        if(p.isCreative())return false;
+        if(com.tnc.tnc.skyacademy.AcademyLessons.trainingProtected(p,pos))return true;
+        var level=p.serverLevel();
+        if(HousingService.plotAt(level,pos)!=null||HousingService.isOwnedPosition(level,pos))return !HousingService.mayDecorate(p,pos);
+        return town(level,pos)&&!com.tnc.tnc.skyacademy.AcademyPracticeAccess.circuit(p,pos);
+    }
     public static boolean hazard(net.minecraft.world.level.BlockGetter world,BlockPos pos){return world instanceof ServerLevel l&&((com.tnc.tnc.npc.SkyIslandAnchors.isComplete(l)&&town(l,pos))||HousingService.isOwnedPosition(l,pos));}
     @SubscribeEvent public static void breaking(BlockEvent.BreakEvent e){if(e.getPlayer() instanceof ServerPlayer p&&(denied(p,e.getPos())||com.tnc.tnc.skyacademy.AcademyLessons.trainingEditDenied(p,e.getPos())))e.setCanceled(true);}
     @SubscribeEvent public static void placing(BlockEvent.EntityPlaceEvent e){if(e.getEntity() instanceof ServerPlayer p&&(denied(p,e.getPos())||com.tnc.tnc.skyacademy.AcademyLessons.trainingEditDenied(p,e.getPos())))e.setCanceled(true);}
@@ -33,6 +39,9 @@ public final class TownProtection {
         // editable without any purchased town property.
         boolean plants=e.getLevel().getBlockState(e.getPos()).getBlock() instanceof net.minecraft.world.level.block.BushBlock;
         var placement=new net.minecraft.world.item.context.BlockPlaceContext(p,e.getHand(),e.getItemStack(),e.getHitVec());
+        if(com.tnc.tnc.skyacademy.AcademyPracticeAccess.placement(p,placement.getClickedPos(),e.getItemStack())
+                &&HousingService.plotAt(p.serverLevel(),e.getPos())==null&&HousingService.plotAt(p.serverLevel(),placement.getClickedPos())==null
+                &&!HousingService.isOwnedPosition(p.serverLevel(),e.getPos())&&!HousingService.isOwnedPosition(p.serverLevel(),placement.getClickedPos()))return;
         if((HousingService.isOwnedPosition(p.serverLevel(),e.getPos())&&!HousingService.mayDecorate(p,e.getPos()))||((edits||plants)&&denied(p,e.getPos()))||(item instanceof net.minecraft.world.item.BlockItem&&denied(p,placement.getClickedPos())))e.setCanceled(true);
     }
     @SubscribeEvent public static void tool(BlockEvent.BlockToolModificationEvent e){if(e.getPlayer() instanceof ServerPlayer p&&(denied(p,e.getPos())||com.tnc.tnc.skyacademy.AcademyLessons.trainingEditDenied(p,e.getPos())))e.setCanceled(true);}

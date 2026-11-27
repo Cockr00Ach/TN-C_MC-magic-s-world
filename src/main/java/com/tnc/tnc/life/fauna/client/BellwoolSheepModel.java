@@ -17,12 +17,16 @@ import net.minecraft.util.Mth;
 public final class BellwoolSheepModel extends QuadrupedModel<BellwoolSheepEntity> {
     public static final ModelLayerLocation LAYER = new ModelLayerLocation(
             ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "bellwool_sheep"), "main");
+    private final com.tnc.tnc.life.pasture.client.PastureSkin skin;
     private final ModelPart fleece;
     private final ModelPart bell;
     private final ModelPart tail;
 
     public BellwoolSheepModel(ModelPart root) {
         super(root, false, 8.0F, 4.0F, 2.0F, 2.0F, 24);
+        skin=new com.tnc.tnc.life.pasture.client.PastureSkin("bellwool_sheep",root,new String[][] {
+                {"head","root"},{"bell","head"},{"body","root"},{"fleece","body"},{"tail","body"},
+                {"right_hind_leg","root"},{"left_hind_leg","root"},{"right_front_leg","root"},{"left_front_leg","root"}});
         fleece = body.getChild("fleece");
         bell = head.getChild("bell");
         tail = body.getChild("tail");
@@ -42,7 +46,7 @@ public final class BellwoolSheepModel extends QuadrupedModel<BellwoolSheepEntity
                 PartPose.offset(0.0F, 9.0F, -8.0F));
         head.addOrReplaceChild("bell", CubeListBuilder.create()
                 .texOffs(52, 42).addBox(-1.5F, 2.0F, -5.5F, 3.0F, 3.0F, 3.0F)
-                .texOffs(32, 0).addBox(-0.5F, 4.0F, -4.5F, 1.0F, 1.0F, 1.0F), PartPose.ZERO);
+                .texOffs(32, 0).addBox(-0.5F, 4.0F, -4.5F, 1.0F, 1.0F, 1.0F), PartPose.offset(0,1.8F,-4.65F));
         PartDefinition body = root.addOrReplaceChild("body",
                 CubeListBuilder.create().texOffs(0, 18)
                         .addBox(-5.0F, -5.0F, -8.0F, 10.0F, 10.0F, 16.0F),
@@ -65,14 +69,27 @@ public final class BellwoolSheepModel extends QuadrupedModel<BellwoolSheepEntity
         return LayerDefinition.create(mesh, 64, 64);
     }
 
+    @Override public void renderToBuffer(com.mojang.blaze3d.vertex.PoseStack stack, com.mojang.blaze3d.vertex.VertexConsumer out,
+                                         int light, int overlay, float r, float g, float b, float a) {
+        if (!young) { skin.draw(stack,out,light,overlay,r,g,b,a,false); return; }
+        stack.pushPose();
+        stack.translate(0,.5,.25);
+        skin.drawSheepSection(true,stack,out,light,overlay,r,g,b,a);
+        stack.popPose();
+        stack.pushPose();stack.scale(.5F,.5F,.5F);stack.translate(0,1.5,0);
+        skin.drawSheepSection(false,stack,out,light,overlay,r,g,b,a);
+        stack.popPose();
+    }
+
     @Override public void setupAnim(BellwoolSheepEntity sheep, float limbSwing, float limbSwingAmount,
                                     float ageInTicks, float netHeadYaw, float headPitch) {
         super.setupAnim(sheep, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
         head.xRot += sheep.grazingPitch(ageInTicks - sheep.tickCount)
                 + sheep.nuzzlePitch(ageInTicks - sheep.tickCount);
         fleece.visible = !sheep.isSheared();
-        float sway = Mth.sin(ageInTicks * 0.35F) * (0.08F + Math.min(0.25F, limbSwingAmount * 0.35F));
+        float sway = Mth.sin(limbSwing*.6662F-.38F)*Math.min(.24F,limbSwingAmount*.32F) + Mth.sin(ageInTicks*.085F)*.018F;
         bell.zRot = sway;
+        bell.xRot = -head.xRot*.32F;
         tail.xRot = Mth.sin(ageInTicks * 0.12F) * 0.09F;
     }
 }

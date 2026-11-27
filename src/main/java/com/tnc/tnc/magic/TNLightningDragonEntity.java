@@ -207,7 +207,7 @@ public class TNLightningDragonEntity extends Entity {
         ServerLevel level = (ServerLevel) this.level();
         // ★ 缠绕形态：跟着人走 + 时间到了/人没了就散 ✓（不需要破土/咆哮那一套）
         if (this.coil()) {
-            Entity wearer = this.ownerId() == null ? null : level.getPlayerByUUID(this.ownerId());
+            Entity wearer = this.ownerId() == null ? null : com.tnc.tnc.dungeon.mirror.MirrorSpellHand.player(level, this.ownerId());
             if (wearer instanceof net.minecraft.world.entity.LivingEntity living) {
                 wearer = living.isAlive() ? living : null;
             }

@@ -61,6 +61,10 @@ public final class WaterTransparencyPass {
             // Separate builders keep consumers valid when bodies, models and glow interleave.
             layers.put(WaterRenderTypes.geometry(),new BufferBuilder(262144));
             layers.put(WaterModelRenderTypes.alpha(),new BufferBuilder(131072));
+            layers.put(AbyssDome.SEAL,new BufferBuilder(4096));
+            layers.put(AbyssDome.FILM,new BufferBuilder(131072));
+            layers.put(AbyssDome.SURF,new BufferBuilder(65536));
+            layers.put(AbyssDome.BUBBLE,new BufferBuilder(8192));
             layers.put(WaterRenderTypes.glow(),new BufferBuilder(131072));
             layers.put(WaterModelRenderTypes.emission(),new BufferBuilder(131072));
             return layers;

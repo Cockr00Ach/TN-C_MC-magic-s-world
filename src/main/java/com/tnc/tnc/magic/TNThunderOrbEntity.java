@@ -130,7 +130,7 @@ public class TNThunderOrbEntity extends Entity {
             return;
         }
         ServerLevel level = (ServerLevel) this.level();
-        Player owner = this.ownerId == null ? null : level.getPlayerByUUID(this.ownerId);
+        Player owner = this.ownerId == null ? null : com.tnc.tnc.dungeon.mirror.MirrorSpellHand.player(level, this.ownerId);
         if (!(owner instanceof ServerPlayer player)
                 || !player.isAlive()
                 || player.level() != this.level()

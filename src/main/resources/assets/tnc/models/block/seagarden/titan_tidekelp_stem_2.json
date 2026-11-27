@@ -1,0 +1,1 @@
+{"loader":"tnc:botanical_mesh","render_type":"minecraft:cutout","ambientocclusion":false,"glow_enabled":true,"textures":{"plant":"tnc:block/seagarden/titan_tidekelp","particle":"tnc:block/seagarden/titan_tidekelp"},"geometry":"tnc:seagarden_meshes/titan_tidekelp_stem_2.json"}

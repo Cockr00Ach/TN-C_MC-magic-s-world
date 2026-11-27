@@ -1,0 +1,15 @@
+newmtl m0
+Ka 0 0 0
+Kd 1 1 1
+map_Kd tnc:item/weapon_surfaces/iron_crescent_scythe_haft
+
+newmtl m1
+Ka 0 0 0
+Kd 1 1 1
+map_Kd tnc:item/weapon_surfaces/iron_crescent_scythe_body
+
+newmtl m2
+Ka 0 0 0
+Kd 1 1 1
+map_Kd tnc:item/arsenal_26/iron_crescent_scythe
+

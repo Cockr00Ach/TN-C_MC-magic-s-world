@@ -1,0 +1,314 @@
+[
+  {
+    "species": "homeward_flower",
+    "family": "flower",
+    "models": 2,
+    "stage_meshes": 2,
+    "mature_surfaces": 642,
+    "emissive_surfaces": 200
+  },
+  {
+    "species": "warning_moss",
+    "family": "moss",
+    "models": 8,
+    "stage_meshes": 4,
+    "mature_surfaces": 780,
+    "emissive_surfaces": 140
+  },
+  {
+    "species": "road_bell_crop",
+    "family": "grain",
+    "models": 8,
+    "stage_meshes": 4,
+    "mature_surfaces": 632,
+    "emissive_surfaces": 112
+  },
+  {
+    "species": "night_gourd_crop",
+    "family": "gourd",
+    "models": 8,
+    "stage_meshes": 4,
+    "mature_surfaces": 336,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "tide_reed_crop",
+    "family": "reed",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 475,
+    "emissive_surfaces": 140
+  },
+  {
+    "species": "hushcap_mushroom",
+    "family": "mushroom",
+    "models": 8,
+    "stage_meshes": 8,
+    "mature_surfaces": 1156,
+    "emissive_surfaces": 280
+  },
+  {
+    "species": "rainletter_bush",
+    "family": "berries",
+    "models": 8,
+    "stage_meshes": 8,
+    "mature_surfaces": 450,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "mana_root",
+    "family": "root",
+    "models": 20,
+    "stage_meshes": 4,
+    "mature_surfaces": 231,
+    "emissive_surfaces": 48
+  },
+  {
+    "species": "verdant_vein",
+    "family": "crystal_tree",
+    "models": 12,
+    "stage_meshes": 4,
+    "mature_surfaces": 322,
+    "emissive_surfaces": 40
+  },
+  {
+    "species": "sky_vine",
+    "family": "vine",
+    "models": 5,
+    "stage_meshes": 4,
+    "mature_surfaces": 672,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "dawn_disk",
+    "family": "sunflower",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 828,
+    "emissive_surfaces": 364
+  },
+  {
+    "species": "hearth_pepper",
+    "family": "pepper",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 528,
+    "emissive_surfaces": 24
+  },
+  {
+    "species": "mist_cotton",
+    "family": "cotton",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 1008,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "stone_fern",
+    "family": "fern",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 655,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "mirror_lotus",
+    "family": "lotus",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 706,
+    "emissive_surfaces": 35
+  },
+  {
+    "species": "wish_puff",
+    "family": "puff",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 804,
+    "emissive_surfaces": 168
+  },
+  {
+    "species": "echo_bean",
+    "family": "beans",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 472,
+    "emissive_surfaces": 224
+  },
+  {
+    "species": "ladder_vine",
+    "family": "vine",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 514,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "frost_chime",
+    "family": "bells",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 380,
+    "emissive_surfaces": 84
+  },
+  {
+    "species": "salt_ink",
+    "family": "mushroom",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 553,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "wind_sail",
+    "family": "fan",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 120,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "sleep_clock",
+    "family": "spiral",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 580,
+    "emissive_surfaces": 112
+  },
+  {
+    "species": "shadow_cut",
+    "family": "orchid",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 180,
+    "emissive_surfaces": 24
+  },
+  {
+    "species": "paper_tree",
+    "family": "paper_tree",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 393,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "flight_pod",
+    "family": "pod",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 271,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "honey_cluster",
+    "family": "cluster",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 756,
+    "emissive_surfaces": 336
+  },
+  {
+    "species": "star_dew",
+    "family": "dew_vine",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 512,
+    "emissive_surfaces": 112
+  },
+  {
+    "species": "dance_bell",
+    "family": "bells",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 762,
+    "emissive_surfaces": 140
+  },
+  {
+    "species": "star_rest",
+    "family": "star",
+    "models": 16,
+    "stage_meshes": 4,
+    "mature_surfaces": 382,
+    "emissive_surfaces": 84
+  },
+  {
+    "species": "dream_compost",
+    "family": "shelf_mushroom",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 508,
+    "emissive_surfaces": 112
+  },
+  {
+    "species": "thermal_foldleaf",
+    "family": "foldleaf",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 246,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "shadow_hour_orchid",
+    "family": "hourglass",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 280,
+    "emissive_surfaces": 28
+  },
+  {
+    "species": "turnpage_fern",
+    "family": "page_fern",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 198,
+    "emissive_surfaces": 8
+  },
+  {
+    "species": "daynight_sandgrain",
+    "family": "twin_grain",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 367,
+    "emissive_surfaces": 0
+  },
+  {
+    "species": "hanging_dewgrass",
+    "family": "dew_grass",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 340,
+    "emissive_surfaces": 120
+  },
+  {
+    "species": "prism_crown",
+    "family": "crystal_crown",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 505,
+    "emissive_surfaces": 208
+  },
+  {
+    "species": "ore_sleep_moss",
+    "family": "ore_moss",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 216,
+    "emissive_surfaces": 40
+  },
+  {
+    "species": "storm_crown",
+    "family": "storm",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 295,
+    "emissive_surfaces": 52
+  },
+  {
+    "species": "steam_lotus",
+    "family": "steam_lotus",
+    "models": 4,
+    "stage_meshes": 4,
+    "mature_surfaces": 737,
+    "emissive_surfaces": 24
+  }
+]

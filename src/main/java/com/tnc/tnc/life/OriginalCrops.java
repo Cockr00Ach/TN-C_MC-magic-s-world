@@ -14,7 +14,6 @@ import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BushBlock;
@@ -29,17 +28,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
 
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The first living specimens of the travel-and-home collection. Registration is
@@ -48,7 +43,6 @@ import java.util.Set;
  */
 @Mod.EventBusSubscriber(modid = TNMod.MODID)
 public final class OriginalCrops {
-    private static final Set<Long> SCOUTED_CHUNKS = new HashSet<>();
     public static Block ROAD_BELL_CROP;
     public static Block NIGHT_GOURD_CROP;
     public static Block TIDE_REED_CROP;
@@ -105,88 +99,6 @@ public final class OriginalCrops {
         }
         return false;
     }
-
-    /**
-     * A sparse field encounter rather than a biome modifier: a biome modifier
-     * cannot distinguish plains on the authored sky island from natural plains.
-     * The island anchor and a 900-block buffer are mandatory before any write.
-     */
-    @SubscribeEvent
-    public static void scoutWildPlants(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
-        var server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
-        if (server == null || server.getTickCount() % 80 != 0) return;
-        ServerLevel level = server.overworld();
-        BlockPos town = com.tnc.tnc.world.SkyIslandSavedData.get(level).anchorPos("CENTER");
-        if (town == null) return;
-        for (var player : level.players()) {
-            if (player.isSpectator() || outsideTown(player.blockPosition(), town) == false) continue;
-            int cx = player.chunkPosition().x + level.random.nextInt(5) - 2;
-            int cz = player.chunkPosition().z + level.random.nextInt(5) - 2;
-            var chunk = level.getChunkSource().getChunkNow(cx, cz);
-            // Place visible wild specimens only on newly visited wilderness.
-            // An inhabited or block-entity-bearing chunk may already contain a
-            // player's imported build even though its air and soil look natural.
-            if (chunk == null || chunk.getInhabitedTime() > 1200
-                    || !chunk.getBlockEntitiesPos().isEmpty()) continue;
-            BlockPos mid = new BlockPos(cx * 16 + 8, level.getSeaLevel(), cz * 16 + 8);
-            ResourceLocation biome = level.getBiome(mid).unwrapKey().map(key -> key.location()).orElse(null);
-            Block specimen = wildForBiome(biome);
-            if (specimen == null) continue;
-            long chunkKey = net.minecraft.world.level.ChunkPos.asLong(cx, cz);
-            if (SCOUTED_CHUNKS.contains(chunkKey)) continue;
-            int planted = 0;
-            for (int attempt = 0; attempt < 48 && planted < 1; attempt++) {
-                int x = cx * 16 + level.random.nextInt(16);
-                int z = cz * 16 + level.random.nextInt(16);
-                BlockPos pos = level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                        new BlockPos(x, 0, z));
-                BlockState plantedState = wildState(specimen);
-                if (!outsideTown(pos, town)
-                        || com.tnc.tnc.home.TownProtection.hazard(level, pos)
-                        || com.tnc.tnc.home.HousingService.plotAt(level, pos) != null
-                        || !level.getBlockState(pos).isAir()
-                        || !plantedState.canSurvive(level, pos)) continue;
-                level.setBlock(pos, plantedState, 3);
-                planted++;
-            }
-            // A dry swamp patch or crowded terrain can be retried while still
-            // newly explored. Never consume a chunk's one encounter on a miss.
-            if (planted > 0) SCOUTED_CHUNKS.add(chunkKey);
-        }
-    }
-
-    private static boolean outsideTown(BlockPos pos, BlockPos town) {
-        long dx = (long) pos.getX() - town.getX();
-        long dz = (long) pos.getZ() - town.getZ();
-        return dx * dx + dz * dz > 900L * 900L;
-    }
-
-    private static Block wildForBiome(ResourceLocation biome) {
-        if (biome == null || !biome.getNamespace().equals("minecraft")) return null;
-        return switch (biome.getPath()) {
-            case "plains", "meadow", "sunflower_plains" -> WILD_ROAD_BELL;
-            case "dark_forest", "old_growth_pine_taiga" -> WILD_NIGHT_GOURD;
-            case "swamp", "mangrove_swamp" -> WILD_TIDE_REED;
-            case "mushroom_fields", "old_growth_spruce_taiga" -> UncommonMagicPlants.HUSHCAP;
-            case "jungle", "sparse_jungle", "bamboo_jungle" -> UncommonMagicPlants.RAINLETTER;
-            case "forest", "birch_forest" -> com.tnc.tnc.life.ecology.EcologyContent.VERDANT;
-            default -> null;
-        };
-    }
-
-    private static BlockState wildState(Block block) {
-        if(block==com.tnc.tnc.life.ecology.EcologyContent.VERDANT)return block.defaultBlockState().setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,true).setValue(com.tnc.tnc.life.ecology.VerdantVeinBlock.AGE,3);
-        if (block == UncommonMagicPlants.HUSHCAP)
-            return block.defaultBlockState().setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,true).setValue(UncommonMagicPlants.HushcapBlock.AGE, 3)
-                    .setValue(UncommonMagicPlants.HushcapBlock.QUIET, 3);
-        if (block == UncommonMagicPlants.RAINLETTER)
-            return block.defaultBlockState().setValue(com.tnc.tnc.life.routes.RoutePlantBlock.WILD,true).setValue(UncommonMagicPlants.RainletterBlock.AGE, 3)
-                    .setValue(UncommonMagicPlants.RainletterBlock.WET, true);
-        return block.defaultBlockState();
-    }
-
-    @SubscribeEvent public static void clearScouting(ServerStoppedEvent event) { SCOUTED_CHUNKS.clear(); }
 
     private static BlockBehaviour.Properties cropProperties() {
         return BlockBehaviour.Properties.copy(Blocks.WHEAT).noCollission().randomTicks();

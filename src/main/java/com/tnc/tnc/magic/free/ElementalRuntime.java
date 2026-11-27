@@ -4,6 +4,8 @@ import com.tnc.tnc.adventure.ElementWands;
 import com.tnc.tnc.magic.*;
 import com.tnc.tnc.network.MagicStoneNetwork;
 import net.minecraft.server.level.*;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -67,7 +69,28 @@ public final class ElementalRuntime {
             placements.add(new Placement(next,null,nextId()));
         }
         var data=MagicStone.getOrNull(owner);if(data.getMana()<intent.cost()*placements.size())return "魔力不足，未开始凝聚。";
-        var charge=new Charge(owner,session,intent,placements);CHARGES.put(owner.getUUID(),charge);charge.show(ElementalNetwork.FORM);return "";
+        var charge=new Charge(owner,session,intent,placements);
+        CHARGES.put(owner.getUUID(),charge);
+        charge.show(ElementalNetwork.FORM);
+        if (intent.ability().element() == Element.FIRE) {
+            fireChargeSound(charge, false);
+        }
+        return "";
+    }
+    private static void fireChargeSound(Charge charge, boolean ready) {
+        var sound = switch (charge.intent.ability()) {
+            case MAGMA_SPRAY, LAVA_VENT, FLAME_COLUMN -> ready ? SoundEvents.BASALT_BREAK : SoundEvents.LAVA_POP;
+            case VIOLET_FIRE, EMBER_MARK -> ready ? SoundEvents.SOUL_ESCAPE : SoundEvents.FIRE_AMBIENT;
+            case FIRE_SERPENT -> ready ? SoundEvents.BLAZE_AMBIENT : SoundEvents.FURNACE_FIRE_CRACKLE;
+            case DETONATE_BURN, FLASH_FIRE -> ready ? SoundEvents.FIRECHARGE_USE : SoundEvents.FURNACE_FIRE_CRACKLE;
+            default -> ready ? SoundEvents.LAVA_POP : SoundEvents.FURNACE_FIRE_CRACKLE;
+        };
+        // The spark starts in the hand. The second cue locates the forming spell.
+        Vec3 source = ready ? charge.at : charge.owner.getEyePosition();
+        float pitch = ready ? 1.32F : .83F;
+        if (charge.intent.has(ElementalIntent.EMPOWER)) pitch *= .78F;
+        charge.level.playSound(null, source.x, source.y, source.z, sound, SoundSource.PLAYERS,
+                ready ? .46F : .40F, pitch);
     }
     static boolean pay(ServerPlayer owner,int cost){
         var data=MagicStone.getOrNull(owner);if(data==null||data.getMana()<cost)return false;
@@ -86,7 +109,14 @@ public final class ElementalRuntime {
             boolean valid=FreeMagicServer.canAct(owner)&&owner.level()==c.level&&owner.getMainHandItem()==c.wand&&tier(owner,c.intent.ability().element())>=c.intent.tier();
             if(!valid){c.show(ElementalNetwork.END);iterator.remove();continue;}
             int duration=c.wave==0?c.intent.charge():c.intent.interval();
-            if(now-c.started<duration){if((now-c.started)%5==0)c.show(ElementalNetwork.FORM);continue;}
+            long elapsed = now - c.started;
+            if (elapsed < duration) {
+                if (c.wave == 0 && elapsed == duration * 3 / 4 && c.intent.ability().element() == Element.FIRE) {
+                    fireChargeSound(c, true);
+                }
+                if (elapsed % 5 == 0) c.show(ElementalNetwork.FORM);
+                continue;
+            }
             boolean placementsValid=c.placements.stream().allMatch(p->p.target()!=null?(c.intent.ability().target==ElementalIntent.Target.FRIEND?ElementalTargets.friend(owner,p.target()):ElementalTargets.enemy(owner,p.target()))&&owner.hasLineOfSight(p.target())&&owner.distanceToSqr(p.target())<=28*28
                     :c.intent.ability().target==ElementalIntent.Target.SELF||c.intent.ability().target==ElementalIntent.Target.CHANNEL_SELF||ElementalTargets.visible(owner,owner.getEyePosition(),p.at())
                     &&(c.intent.ability().target!=ElementalIntent.Target.PROJECTILE||ElementalTargets.open(owner,p.at(),.35*c.intent.scale()))

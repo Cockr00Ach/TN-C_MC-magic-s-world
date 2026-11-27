@@ -130,7 +130,9 @@ public final class ManaShield {
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onHurt(LivingHurtEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
+        var player = event.getEntity();
+        if (com.tnc.tnc.dungeon.mirror.MirrorSilence.active(player)
+                || (!(player instanceof ServerPlayer) && !(player instanceof com.tnc.tnc.dungeon.mirror.EchoDouble echo && !echo.melee()))) {
             return;
         }
         if (event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
@@ -160,7 +162,7 @@ public final class ManaShield {
         level.sendParticles(ParticleTypes.GLOW, at.x, at.y, at.z, 24, 0.7, 0.7, 0.7, 0.05);
         level.playSound(null, player.blockPosition(), SoundEvents.GLASS_BREAK,
                 SoundSource.PLAYERS, 0.9F, 1.5F);
-        player.displayClientMessage(Component.literal(
+        if (player instanceof ServerPlayer recipient) recipient.displayClientMessage(Component.literal(
                 left.length == 0 ? "§b[TN-C] §r护盾破碎！" : "§b[TN-C] §r护盾挡下一击 §7（剩 "
                         + left.length + " 层）"), true);
     }

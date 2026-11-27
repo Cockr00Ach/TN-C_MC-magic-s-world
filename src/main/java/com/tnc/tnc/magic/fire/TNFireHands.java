@@ -75,7 +75,7 @@ public final class TNFireHands {
             var entry = iterator.next();
             var field = entry.getValue();
             if (field.level().getServer() != event.getServer()) continue;
-            var player = field.level().getPlayerByUUID(field.caster());
+            var player = com.tnc.tnc.dungeon.mirror.MirrorSpellHand.player(field.level(),field.caster());
             long now = field.level().getGameTime();
             if (!(player instanceof ServerPlayer caster) || !caster.isAlive() || caster.isSpectator()
                     || now >= field.end() || !field.level().hasChunkAt(BlockPos.containing(field.center()))) {

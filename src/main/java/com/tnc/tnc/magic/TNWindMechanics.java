@@ -275,7 +275,7 @@ public final class TNWindMechanics {
      *
      * <p>⚠️ 别把这段并回 {@code onPlayerTick} 的早退之后 ✗（那里状态没变就 return，会一 tick 都不执行）。
      */
-    private static void tickSpirits(ServerPlayer player) {
+    public static void tickSpirits(ServerPlayer player) {
         OrbTier tier = orbTier(player);
         java.util.List<TNWindSpiritEntity> mine = player.serverLevel().getEntitiesOfClass(
                 TNWindSpiritEntity.class, player.getBoundingBox().inflate(24.0D),
@@ -391,10 +391,10 @@ public final class TNWindMechanics {
         //   把每 tick 的视觉一起吃掉（这正是"加在末尾看不到效果"的经典坑 ✓）。
         tickFootWind(player, player.level().getGameTime());
         boolean creativeLike = player.isCreative() || player.isSpectator();
-        boolean shouldFly = permanentFlight(player)
+        boolean shouldFly = !com.tnc.tnc.dungeon.mirror.MirrorSilence.active(player) && (permanentFlight(player)
                 || player.hasEffect(WIND_FLIGHT.get()) || has(player,WIND_SPEED_III)
                 || lightWings(player)                    // ★ 光翼链：任一档 buff 在身就允许飞 ✓
-                || com.tnc.tnc.travel.TravelFormService.allowsFlight(player); // 元素附身（雷/暗等空中形态）
+                || com.tnc.tnc.travel.TravelFormService.allowsFlight(player)); // 元素附身（雷/暗等空中形态）
         if (shouldFly == player.getAbilities().mayfly) {
             return;                                  // 已经是想要的状态，别每 tick 刷同步包
         }

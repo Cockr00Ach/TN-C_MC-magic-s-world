@@ -495,6 +495,8 @@ public final class FireSpellRules {
      *               这时"排除自己"自动失效，其余照旧，区域不会整个失效 ✓
      */
     public static boolean hittable(LivingEntity caster, LivingEntity target) {
+        if (com.tnc.tnc.dungeon.mirror.MirrorSpells.body(caster) != null)
+            return com.tnc.tnc.dungeon.mirror.MirrorSpells.enemy(caster, target);
         return target != null
                 && target != caster
                 && target.isAlive()

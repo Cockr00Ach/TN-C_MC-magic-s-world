@@ -20,6 +20,7 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
         double r=(e.kind()==2&&e.tier()==5?Math.max(e.radius(),46.8):e.radius()*1.25), h=e.kind()==2&&e.tier()==5?Math.max(120,SeaGodSwordRules.DROP_HEIGHT+16):e.height()+4;
         // Rolled slash blades also extend below their flight axis.
         double below=e.kind()==1&&e.tier()==3?r:1;
+        if(e.kind()==2 && e.tier()==4){r=e.radius()*1.28;h=WaterPrisonShape.domeHeight(e.radius(),e.height())+2;}
         return f.isVisible(new net.minecraft.world.phys.AABB(e.position(),center).inflate(r,below,r).expandTowards(0,h,0));}
     @Override public void render(TNWaterFieldEntity e,float yaw,float partial,PoseStack stack,MultiBufferSource buffers,int light) {
         buffers=WaterTransparencyPass.route(buffers);
@@ -31,6 +32,15 @@ public final class TNWaterFieldRenderer extends EntityRenderer<TNWaterFieldEntit
         double animation=e.visualAge(partial);
         double age=e.age()+partial;float fade=(float)Math.min(1,Math.min(age/5,(e.life()-age)/8))*(e.kind()==2?FirstPersonSpellView.opacity(e.visualOwner(),e.waveCenter(age),Math.min(4,e.radius())):1);if(fade<=0)return;
         if(e.kind()==3){WaterRainVisuals.render(e,animation,fade,stack,buffers);return;}
+        if (e.kind()==2 && e.tier()==4) {
+            var eye=net.minecraft.client.Minecraft.getInstance().gameRenderer.getMainCamera().getPosition().subtract(e.position());
+            AbyssDome.render(stack,buffers,e.radius(),e.height(),age,fade,eye);
+            return;
+        }
+        if (e.kind() == 2 && WaterPrisonShape.usesArches(e.tier())) {
+            WaterPrisonArcade.render(stack, buffers, e.radius(), e.height(), age, fade, e.tier());
+            return;
+        }
         var out=buffers.getBuffer(WaterRenderTypes.geometry());var pose=stack.last().pose();double radius=e.radius();Vec3 up=new Vec3(0,1,0);
         if(e.kind()==1) {
             Vec3 center=e.waveCenter(age).subtract(e.position());

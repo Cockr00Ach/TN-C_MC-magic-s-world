@@ -52,6 +52,7 @@ public final class AcademyStations {
     }
     public static void setup(ServerPlayer p,String site,boolean demo){
         var l=p.serverLevel();var b=base(p.server,site);if(b==null||!l.hasChunkAt(b)||!AcademyLessons.leased(p,site))return;
+        recoverOldPracticePiece(p, site);
         for(int x=-1;x<=8;x++)for(int z=-1;z<=3;z++){var q=b.offset(x,-1,z);if(l.getBlockState(q).isAir())l.setBlock(q,Blocks.MOSSY_STONE_BRICKS.defaultBlockState(),3);}
         if(site.equals("farm")){
             l.setBlock(b.below(),RouteContent.SOIL.get().defaultBlockState(),3);
@@ -59,7 +60,9 @@ public final class AcademyStations {
             // Stone lip contains the actual flowing fluid; no particle-only substitute.
             for(var q:java.util.List.of(b.offset(-1,-1,1),b.offset(1,-1,1),b.offset(0,-1,2),b.offset(0,-2,1)))l.setBlock(q,Blocks.STONE_BRICKS.defaultBlockState(),3);
             l.setBlock(b,BotanicalContent.BLOCKS.get("wind_sail").defaultBlockState().setValue(BotanicalBlock.AGE,3),3);
-            var plant=(BotanicalPlantEntity)l.getBlockEntity(b);plant.owner=p.getUUID();plant.wild=false;plant.growth=plant.species().firstTicks;plant.setChanged();
+            var plant=(BotanicalPlantEntity)l.getBlockEntity(b);plant.owner=p.getUUID();plant.wild=false;plant.growth=plant.species().firstTicks;
+            plant.getPersistentData().putBoolean("SkyAcademy", true);
+            plant.setChanged();
             clearPracticeSlot(p,b.east());
             if(demo)node(p,b.east(),RouteKind.COLLECTOR);else {AcademyLessons.data(p).putBoolean("PlantPlaced",false);}
             var collector=node(p,b.east(4),RouteKind.ANIMAL_COLLECTOR);collector.mana=0;
@@ -77,6 +80,28 @@ public final class AcademyStations {
             if(demo)node(p,b.east(2),RouteKind.WIRE);else {AcademyLessons.data(p).putBoolean("WirePlaced",false);kit(p,"WireKit","mana_thread");}
             for(int x=0;x<5;x++)if(l.getBlockState(b.east(x)).getBlock() instanceof RouteWireBlock wire)wire.refresh(l,b.east(x));
         }
+    }
+    /** Move an enrolled player's own practice piece out of the retired station. */
+    private static void recoverOldPracticePiece(ServerPlayer p, String site) {
+        boolean farm = site.equals("farm");
+        var progress = AcademyLessons.data(p);
+        String checked = farm ? "FarmPlotMoved" : "WorkshopBenchMoved";
+        if (progress.getBoolean(checked)) return;
+        // A player who never placed a piece has nothing to fetch from an old chunk.
+        if (progress.getBoolean(farm ? "PlantPlaced" : "WirePlaced")) {
+            var origin = SkyAcademyWorld.origin(p.server);
+            var oldSlot = origin.offset(farm ? new BlockPos(91, 92, 310) : new BlockPos(417, 93, 365));
+            if (oldSlot.equals(base(p.server, site).east(farm ? 1 : 2))) return;
+            if (p.serverLevel().getBlockEntity(oldSlot) instanceof RouteNodeEntity node
+                    && node.kind() == (farm ? RouteKind.COLLECTOR : RouteKind.WIRE)
+                    && node.getPersistentData().hasUUID("AcademyPlacedBy")
+                    && p.getUUID().equals(node.getPersistentData().getUUID("AcademyPlacedBy"))) {
+                clearPracticeSlot(p, oldSlot);
+                p.displayClientMessage(net.minecraft.network.chat.Component.literal("导师把你留在旧练习台的物件送还给了你。"), true);
+            }
+        }
+        progress.putBoolean(checked, true);
+        AcademyLessons.dirty(p);
     }
     public static boolean complete(ServerPlayer p,String site){
         var b=base(p.server,site);var l=p.serverLevel();if(b==null||!l.hasChunkAt(b))return false;

@@ -1,0 +1,31 @@
+{
+  "variants": {
+    "section=0,voice=0": {
+      "model": "tnc:block/wind_chimes/foot"
+    },
+    "section=1,voice=0": {
+      "model": "tnc:block/wind_chimes/shaft_harp"
+    },
+    "section=2,voice=0": {
+      "model": "tnc:block/wind_chimes/crown_harp"
+    },
+    "section=0,voice=1": {
+      "model": "tnc:block/wind_chimes/foot"
+    },
+    "section=1,voice=1": {
+      "model": "tnc:block/wind_chimes/shaft_iris"
+    },
+    "section=2,voice=1": {
+      "model": "tnc:block/wind_chimes/crown_iris"
+    },
+    "section=0,voice=2": {
+      "model": "tnc:block/wind_chimes/foot"
+    },
+    "section=1,voice=2": {
+      "model": "tnc:block/wind_chimes/shaft_chorus"
+    },
+    "section=2,voice=2": {
+      "model": "tnc:block/wind_chimes/crown_chorus"
+    }
+  }
+}

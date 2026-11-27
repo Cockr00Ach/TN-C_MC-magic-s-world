@@ -94,6 +94,8 @@ public final class WarriorComboService {
         long lastHint = Long.MIN_VALUE;
         /** 振刀架势持续到这个 tick（含）：这段时间里被攻击链打到，出手的人会被架住。 */
         long stanceUntil = Long.MIN_VALUE;
+        long guardRaisedAt = Long.MIN_VALUE;
+        long evasionAt = Long.MIN_VALUE;
         long counterAt = Long.MIN_VALUE;
         long counterReady = Long.MIN_VALUE;
         /** 正在“按着不放”的架势招（振刀）；松手时据此收势。 */
@@ -386,6 +388,7 @@ public final class WarriorComboService {
             backstep(player, skill.backstep());
         }
         if (skill.evades()) {
+            state.evasionAt = now;
             // 闪避链：短暂无敌帧，配合后撤真的躲开这一下
             player.invulnerableTime = Math.max(player.invulnerableTime, skill.evadeTicks());
         }
@@ -401,6 +404,7 @@ public final class WarriorComboService {
                     net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE, skill.guardTicks(), 2, false, false));
         }
         if (skill.role() == WarriorComboRole.STANCE) {
+            state.guardRaisedAt = now;
             // 振刀架势窗口：这之后一段时间里，攻击链打到你会被架住（见 melee 里的 parried）
             state.stanceUntil = now + skill.guardTicks();
         }
@@ -428,6 +432,7 @@ public final class WarriorComboService {
         }
         state.finisherUntil = 0;
         state.heldSkill = null;
+        state.guardRaisedAt = Long.MIN_VALUE;
         WarriorAnimationPacket.cancel(player);
     }
 
@@ -463,11 +468,32 @@ public final class WarriorComboService {
             }
         } else {
             // 短按：一大段前冲，用来贴脸或拉开
+            state(player.getUUID()).evasionAt = gameTime(player);
             dash(player, SHIFT_STEP_TAP_BLOCKS);
         }
         player.serverLevel().playSound(null, player.blockPosition(),
                 sprint ? SoundEvents.PLAYER_ATTACK_SWEEP : SoundEvents.PLAYER_ATTACK_NODAMAGE,
                 SoundSource.PLAYERS, .5f, sprint ? 1.4f : 1.7f);
+    }
+
+    /** A scripted boss may expose a short counter window on explicitly telegraphed heavy attacks. */
+    public static boolean consumePrecisionCounter(ServerPlayer player, boolean facing) {
+        State state = STATES.get(player.getUUID());
+        if (state == null || !eligible(player) || WarriorWeapons.family(player.getMainHandItem()) == null) return false;
+        long now = gameTime(player);
+        if (facing && now < state.stanceUntil && state.guardRaisedAt >= now - 6 && state.guardRaisedAt <= now) {
+            state.guardRaisedAt = Long.MIN_VALUE;
+            state.stanceUntil = Long.MIN_VALUE;
+            state.heldSkill = null;
+            player.removeEffect(net.minecraft.world.effect.MobEffects.DAMAGE_RESISTANCE);
+            WarriorAnimationPacket.cancel(player);
+            return true;
+        }
+        if (state.evasionAt >= now - 5 && state.evasionAt <= now) {
+            state.evasionAt = Long.MIN_VALUE;
+            return true;
+        }
+        return false;
     }
 
     /** 近战终结技：每条链共用这段，打断/僵直由数据字段决定。 */

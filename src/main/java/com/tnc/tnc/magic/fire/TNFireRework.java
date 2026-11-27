@@ -121,7 +121,7 @@ public final class TNFireRework {
             Burn burn = entry.getValue();
             if (event.getServer().getLevel(burn.level.dimension()) != burn.level
                     || !(burn.level.getEntity(entry.getKey()) instanceof LivingEntity target)
-                    || !(burn.level.getEntity(burn.owner) instanceof ServerPlayer caster)
+                    || !(com.tnc.tnc.dungeon.mirror.MirrorSpellHand.player(burn.level,burn.owner) instanceof ServerPlayer caster)
                     || !caster.isAlive() || caster.isSpectator() || target.isInWaterOrBubble()
                     || !canDamage(caster, target)) {
                 it.remove();
@@ -222,7 +222,7 @@ public final class TNFireRework {
             return true;
         });
         for (Pending p : due) {
-            if (p.level.getEntity(p.owner) instanceof ServerPlayer caster
+            if (com.tnc.tnc.dungeon.mirror.MirrorSpellHand.player(p.level,p.owner) instanceof ServerPlayer caster
                     && caster.isAlive() && !caster.isSpectator()
                     && p.level.hasChunkAt(BlockPos.containing(p.at))) resolve(caster, p);
         }

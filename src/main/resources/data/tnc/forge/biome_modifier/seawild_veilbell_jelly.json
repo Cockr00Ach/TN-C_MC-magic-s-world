@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:seawild_veilbell_jelly",
+  "spawners": {
+    "type": "tnc:veilbell_jelly",
+    "weight": 5,
+    "minCount": 1,
+    "maxCount": 2
+  }
+}

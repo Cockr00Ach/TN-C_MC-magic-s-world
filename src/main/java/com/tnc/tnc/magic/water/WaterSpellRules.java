@@ -116,6 +116,8 @@ public final class WaterSpellRules {
     }
     public static boolean enemy(LivingEntity caster, LivingEntity target) {
         if (caster==null || target==null) return false;
+        if (com.tnc.tnc.dungeon.mirror.MirrorSpells.body(caster) != null)
+            return com.tnc.tnc.dungeon.mirror.MirrorSpells.enemy(caster, target);
         if (caster instanceof com.tnc.tnc.boss.TNWaterLeviathanEntity) {
             return target != caster && target.isAlive() && !target.isAlliedTo(caster)
                     && !caster.isAlliedTo(target)

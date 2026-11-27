@@ -120,6 +120,13 @@ public final class SpellEngineManaHook {
             seen.incrementAndGet();
 
             ResourceLocation spellId = args.spell().id();
+            if (args.caster() instanceof com.tnc.tnc.dungeon.mirror.MirrorSpellHand hand) {
+                if (args.action() == net.spell_engine.internals.casting.SpellCast.Action.RELEASE) hand.authored(spellId);
+                return;
+            }
+            if (args.caster() instanceof ServerPlayer p && args.action() == net.spell_engine.internals.casting.SpellCast.Action.RELEASE) {
+                com.tnc.tnc.dungeon.mirror.MirrorSpells.record(p, spellId);
+            }
             String casterName = args.caster() == null ? "null" : args.caster().getName().getString();
             SpellCatalog.Entry entry = SpellCatalog.byId(spellId);
 

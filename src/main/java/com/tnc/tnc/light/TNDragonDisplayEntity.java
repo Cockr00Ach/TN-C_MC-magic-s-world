@@ -403,7 +403,7 @@ public class TNDragonDisplayEntity extends Display.BlockDisplay {
             if (!this.isValidTarget(victim) || !this.hitThisCharge.add(victim.getId())) {
                 continue;
             }
-            LivingEntity caster = this.ownerId == null ? null : level.getPlayerByUUID(this.ownerId);
+            LivingEntity caster = this.ownerId == null ? null : com.tnc.tnc.dungeon.mirror.MirrorSpellHand.player(level, this.ownerId);
             victim.hurt(level.damageSources().indirectMagic(this, caster == null ? this : caster),
                     (float) this.chargeDamage);
             victim.hurtMarked = true;

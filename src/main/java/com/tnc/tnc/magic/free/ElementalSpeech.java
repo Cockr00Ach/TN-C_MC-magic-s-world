@@ -20,7 +20,47 @@ public final class ElementalSpeech {
     public static String resolve(String text,String hint,Element context){
         if(text==null)text="";if(ElementalIntent.parse(text,context).isPresent()||hint==null||hint.isBlank())return text;
         var candidate=ElementalIntent.parse(hint,context);
-        return candidate.isPresent()&&candidate.get().ability().element()==context?(text+" "+candidate.get().ability().label).strip():text;
+        if (candidate.isEmpty() || candidate.get().ability().element() != context) return text;
+        var ability = candidate.get().ability();
+        if (text.isBlank()) return ability.label;
+        String heard = text.replaceAll("\\s+", "");
+        for (String alias : ability.aliases) {
+            if (heard.length() == 1 && alias.length() >= 2
+                    && (samePronunciation(heard, alias.substring(0, 1))
+                    || samePronunciation(heard, alias.substring(alias.length() - 1)))) return ability.label;
+            for (int at = 0; at + alias.length() <= heard.length(); at++) {
+                if (corroborates(heard, at, alias, ability.label)) {
+                    return heard.substring(0, at) + ability.label + heard.substring(at + alias.length());
+                }
+            }
+        }
+        return text;
+    }
+
+    // A shared ending such as 球 cannot distinguish 地球 from 雷球.
+    // For a two-syllable correction in a longer sentence, require both syllables.
+    private static boolean corroborates(String heard, int start, String alias, String canonical) {
+        int missing = -1;
+        for (int i = 0; i < alias.length(); i++) {
+            char actual = heard.charAt(start + i), wanted = alias.charAt(i);
+            if (actual == wanted || sameReading(actual, wanted)) continue;
+            if (missing >= 0) return false;
+            missing = i;
+        }
+        if (missing < 0) return true;
+        if (alias.length() > 2) return true;
+        if (alias.length() < 2 || heard.length() != alias.length()) return false;
+        if (missing != 0) return true;
+        // The spotter can disambiguate a sibilant onset (e.g. 死火 / 紫火).
+        // Require the rest of the syllable and the entire second syllable to agree.
+        String actual = READINGS.get(heard.charAt(start));
+        String target = READINGS.get(alias.charAt(0));
+        if (actual != null && target != null && actual.length() > 1 && target.length() > 1
+                && "sz".indexOf(actual.charAt(0)) >= 0 && "sz".indexOf(target.charAt(0)) >= 0
+                && actual.substring(1).equals(target.substring(1))) return true;
+        char suffix = alias.charAt(1);
+        return WORDS.stream().noneMatch(word -> word.canonical.length() == 2
+                && word.canonical.charAt(1) == suffix && !word.canonical.equals(canonical));
     }
     public static String normalize(String raw,Element context){
         if(raw==null||raw.isEmpty())return "";
@@ -56,6 +96,19 @@ public final class ElementalSpeech {
             if(!a.equals(b)&&++cost>1)return 2;
         }
         return cost;
+    }
+    static boolean samePronunciation(String heard, String name) {
+        if (heard.length() != name.length()) return false;
+        for (int index = 0; index < name.length(); index++) {
+            char actual = heard.charAt(index), expected = name.charAt(index);
+            if (actual == expected) continue;
+            if (!sameReading(actual, expected)) return false;
+        }
+        return true;
+    }
+    private static boolean sameReading(char actual, char expected) {
+        String reading = READINGS.get(actual);
+        return reading != null && reading.equals(READINGS.get(expected));
     }
     private static String dialect(String value){
         if(value.startsWith("zh")||value.startsWith("ch")||value.startsWith("sh"))value=value.charAt(0)+value.substring(2);

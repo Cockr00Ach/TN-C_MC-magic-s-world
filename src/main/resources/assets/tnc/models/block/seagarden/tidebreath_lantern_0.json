@@ -1,0 +1,1 @@
+{"loader":"tnc:botanical_mesh","render_type":"minecraft:cutout","ambientocclusion":false,"glow_enabled":true,"textures":{"plant":"tnc:block/seagarden/tidebreath_lantern","particle":"tnc:block/seagarden/tidebreath_lantern"},"geometry":"tnc:seagarden_meshes/tidebreath_lantern_0.json"}

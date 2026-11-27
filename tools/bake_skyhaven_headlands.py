@@ -241,6 +241,8 @@ def bake(rtf_jar,base=TARGET,destination=TARGET):
         os.replace(stage,destination)
         if destination.resolve()==TARGET.resolve():
             terrain.write_coast(land)
+            from bake_academy_clearings import build as finish_lessons, PATCH as lesson_patch
+            finish_lessons(destination,destination,lesson_patch)
     finally:
         stage.unlink(missing_ok=True)
     print(f"Baked {changed} changed chunks and {added} additional chunks into {destination}")

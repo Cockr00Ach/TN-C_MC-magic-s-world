@@ -12,11 +12,16 @@ import java.util.*;
 
 /** Authored element meshes retain their own materials; animation is driven by cast phase. */
 final class ElementalMeshes {
-    private record Face(float[] vertices,Vector3f normal,String material,float reveal){}
+    private record Face(float[] vertices,Vector3f normal,String material,float reveal,boolean jaw){}
     private static final Map<String,List<Face>> CACHE=new HashMap<>();
     private static final Map<String,RenderType> PASSES=new HashMap<>();
     static void clear(){CACHE.clear();PASSES.clear();}
     static void draw(PoseStack pose,MultiBufferSource buffers,String model,double progress,double time){
+        draw(pose, buffers, model, progress, time, 0);
+    }
+
+    /** Curvature in radians per block of tail. A cast coils beside the head and straightens on release. */
+    static void draw(PoseStack pose,MultiBufferSource buffers,String model,double progress,double time,double coil){
         if(progress<=0)return;float amount=(float)Math.min(1,progress);boolean snake=model.equals("fire-snake");
         for(var face:CACHE.computeIfAbsent(model,ElementalMeshes::load)){
             float open=Math.max(0,Math.min(1,(amount-face.reveal*.7f)/.3f));if(open<=0)continue;
@@ -28,12 +33,47 @@ final class ElementalMeshes {
             int light=face.material.equals("ember")||face.material.equals("lava")?0x00B000B0:LightTexture.FULL_BRIGHT;
             for(int n=0;n<20;n+=5){
                 float x=v[n],y=v[n+1],z=v[n+2];
-                if(snake){double d=Math.max(0,.095-z),weight=Math.min(1,d/3.205);x+=(float)(.22*weight*Math.sin(time*.22-d*3.2));}
-                else if(face.material.equals("flame")||face.material.equals("violet"))x+=(float)(.035*Math.sin(time*.13+z*4+y*3));
-                float grow=.75f+.25f*open;
-                out.vertex(pose.last().pose(),x*grow,y*grow,z*grow).color(1f,1f,1f,open*.94f)
+                float nx = normal.x, nz = normal.z;
+                float ny = normal.y;
+                if (snake) {
+                    if (face.jaw) {
+                        double angle = .10 + .24 * Math.min(1,coil) + .045 * Math.sin(time * .25);
+                        double cos = Math.cos(angle), sin = Math.sin(angle);
+                        double dy = y - .23, dz = z - .09;
+                        y = (float)(.23 + dy * cos - dz * sin);
+                        z = (float)(.09 + dy * sin + dz * cos);
+                        ny = (float)(normal.y * cos - normal.z * sin);
+                        nz = (float)(normal.y * sin + normal.z * cos);
+                    }
+                    double d = Math.max(0, .095 - z);
+                    double weight = Math.min(1, d / 3.205);
+                    x += (float)(.26 * weight * Math.sin(time * .22 - d * 3.2));
+                    if (d > 0 && coil > .002) {
+                        double theta = d * coil;
+                        double cos = Math.cos(theta), sin = Math.sin(theta);
+                        double lateral = x;
+                        x = (float)((1 - cos) / coil + lateral * cos);
+                        z = (float)(.095 - sin / coil + lateral * sin);
+                        // Elevate alternating coils so the silhouette reads from eye height.
+                        y += (float)(Math.min(1, coil) * weight * .72 * Math.sin(d * 2.55 - .35));
+                        nx = (float)(normal.x * cos - normal.z * sin);
+                        nz = (float)(normal.x * sin + normal.z * cos);
+                    }
+                } else if(face.material.equals("flame")||face.material.equals("violet")) {
+                    x += (float)(.035 * Math.sin(time * .13 + z * 4 + y * 3));
+                }
+                float grow = .75f + .25f * open;
+                float green = 1, blue = 1;
+                if (element.equals("fire") && (face.material.equals("flame") || face.material.equals("lava"))) {
+                    // Two moving spatial waves keep adjacent faces coherent as the light travels across the skin.
+                    float heat = (float)(.5 + .25 * Math.sin(x * 7 + z * 5 - time * .22)
+                                             + .25 * Math.sin(y * 8 - z * 3 + time * .17));
+                    green = .66f + .34f * heat;
+                    blue = .50f + .50f * heat;
+                }
+                out.vertex(pose.last().pose(),x*grow,y*grow,z*grow).color(1f,green,blue,open*.94f)
                         .uv(v[n+3],v[n+4]).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light)
-                        .normal(pose.last().normal(),normal.x,normal.y,normal.z).endVertex();
+                        .normal(pose.last().normal(),nx,ny,nz).endVertex();
             }
         }
     }
@@ -46,12 +86,14 @@ final class ElementalMeshes {
             for(var raw:meshes)for(var point:raw.getAsJsonObject().getAsJsonArray("points")){float z=point.getAsJsonArray().get(2).getAsFloat();min=Math.min(min,z);max=Math.max(max,z);}
             List<Face> result=new ArrayList<>();
             for(var raw:meshes){var mesh=raw.getAsJsonObject();var points=mesh.getAsJsonArray("points");String material=mesh.get("material").getAsString();
+                String part = mesh.has("name") ? mesh.get("name").getAsString() : "";
+                boolean jaw = name.equals("fire-snake") && (part.contains("下颌") || part.contains("舌"));
                 for(var rawFace:mesh.getAsJsonArray("faces")){var face=rawFace.getAsJsonObject();var indices=face.getAsJsonArray("v");var uv=face.getAsJsonArray("uv");float[] vertices=new float[20];
                     for(int i=0;i<4;i++){int k=Math.min(i,indices.size()-1);var point=points.get(indices.get(k).getAsInt()).getAsJsonArray();var tex=uv.get(k).getAsJsonArray();for(int axis=0;axis<3;axis++)vertices[i*5+axis]=point.get(axis).getAsFloat();vertices[i*5+3]=tex.get(0).getAsFloat();vertices[i*5+4]=tex.get(1).getAsFloat();}
                     var normal=new Vector3f(vertices[5]-vertices[0],vertices[6]-vertices[1],vertices[7]-vertices[2]).cross(vertices[10]-vertices[0],vertices[11]-vertices[1],vertices[12]-vertices[2]);
                     if(normal.lengthSquared()<1e-8)continue;normal.normalize();
                     float center=(vertices[2]+vertices[7]+vertices[12]+vertices[17])*.25f;
-                    result.add(new Face(vertices,normal,material,(max-center)/Math.max(.001f,max-min)));
+                    result.add(new Face(vertices,normal,material,(max-center)/Math.max(.001f,max-min),jaw));
                 }
             }return List.copyOf(result);
         }catch(IOException error){throw new UncheckedIOException("Cannot load authored fire form "+name,error);}

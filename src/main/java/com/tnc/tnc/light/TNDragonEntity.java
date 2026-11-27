@@ -553,7 +553,7 @@ public class TNDragonEntity extends Entity implements GeoEntity {
                 if (!this.isValidLightTarget(victim) || !this.hitThisCharge.add(victim.getId())) {
                     continue;
                 }
-                LivingEntity caster = this.ownerId == null ? null : level.getPlayerByUUID(this.ownerId);
+                LivingEntity caster = this.ownerId == null ? null : com.tnc.tnc.dungeon.mirror.MirrorSpellHand.player(level, this.ownerId);
                 victim.hurt(level.damageSources().indirectMagic(this, caster == null ? this : caster),
                         (float) this.chargeDamage);
                 victim.push(this.chargeDir.x * 2.0D, 0.45D, this.chargeDir.z * 2.0D);
@@ -571,7 +571,7 @@ public class TNDragonEntity extends Entity implements GeoEntity {
      * <p>主人没了（死了/换维度）⇒ 立刻爆开消失 ✓（不留一条孤儿龙在天上转 ✗）。
      */
     private void tickOrbit(ServerLevel level) {
-        LivingEntity owner = this.ownerId == null ? null : level.getPlayerByUUID(this.ownerId);
+        LivingEntity owner = this.ownerId == null ? null : com.tnc.tnc.dungeon.mirror.MirrorSpellHand.player(level, this.ownerId);
         if (owner == null || !owner.isAlive()) {
             this.burst(level, 24, 1.0D);
             this.discard();
@@ -868,7 +868,7 @@ public class TNDragonEntity extends Entity implements GeoEntity {
             this.entityData.set(DATA_ORBIT_START, (int) Math.round(this.orbitAngle * 100.0D));
             if (this.ownerId != null && this.level() instanceof ServerLevel server) {
                 net.minecraft.server.level.ServerPlayer owner =
-                        server.getServer().getPlayerList().getPlayer(this.ownerId);
+                        com.tnc.tnc.dungeon.mirror.MirrorSpellHand.owner(server, this.ownerId);
                 if (owner != null) {
                     this.entityData.set(DATA_OWNER_EID, owner.getId());
                 }

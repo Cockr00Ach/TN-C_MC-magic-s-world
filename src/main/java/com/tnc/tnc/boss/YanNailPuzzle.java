@@ -189,6 +189,11 @@ public final class YanNailPuzzle {
         ROUNDS.remove(boss.getUUID());
     }
 
+    public static void abandon(ServerLevel level, YanDarkBossEntity boss) {
+        Round round = ROUNDS.get(boss.getUUID());
+        if (round != null) cleanup(level, boss, round);
+    }
+
     private static int aliveNails(ServerLevel level, Round round) {
         int n = 0;
         for (UUID id : round.nails) {

@@ -37,9 +37,10 @@ public final class WaterGateEvents {
         if (event.getSource().getDirectEntity() instanceof TNWaterLanceEntity) {
             return;         // 自己的水波不算"玩家攻击"（不然一轮齐射会滚成无限轮 ✗）
         }
-        if (!(event.getSource().getEntity() instanceof ServerPlayer player)) {
-            return;
-        }
+        var source=event.getSource().getEntity();
+        var player=source instanceof ServerPlayer p ? p : source instanceof com.tnc.tnc.dungeon.mirror.EchoDouble echo
+                && !echo.melee() ? com.tnc.tnc.dungeon.mirror.MirrorSpellHand.owner((net.minecraft.server.level.ServerLevel)echo.level(),echo.getUUID()) : null;
+        if (player == null) return;
         LivingEntity victim = event.getEntity();
         if (victim == player || !WaterSpellRules.enemy(player, victim)) {
             return;

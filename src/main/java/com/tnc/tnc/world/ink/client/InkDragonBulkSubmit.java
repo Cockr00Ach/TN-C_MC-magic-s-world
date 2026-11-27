@@ -8,7 +8,7 @@ import org.lwjgl.system.*;
 import com.tnc.tnc.world.ink.InkDragonVertexPacking;
 
 /** Optional Embeddium API. Its registered Oculus serializer owns all extended attributes. */
-final class InkDragonBulkSubmit {
+public final class InkDragonBulkSubmit {
     private record Bridge(MethodHandle writer,MethodHandle push,Object format) {}
     private static final Bridge BRIDGE=resolve();
     private static long bulkVertices,bulkCalls,legacyVertices;
@@ -29,13 +29,13 @@ final class InkDragonBulkSubmit {
         } catch(Throwable unavailable) { return null; }
     }
     static boolean available(){return BRIDGE!=null;}
-    static Object writer(VertexConsumer consumer) {
+    public static Object writer(VertexConsumer consumer) {
         if(BRIDGE==null||Boolean.getBoolean("tnc.inkDragonLegacyVertices"))return null;
         try{return (Object)BRIDGE.writer.invokeExact(consumer);}
         catch(Throwable unavailable){return null;}
     }
     static void legacy(int count){legacyVertices+=count;}
-    static void push(Object writer,ByteBuffer data,int count) {
+    public static void push(Object writer,ByteBuffer data,int count) {
         long base=MemoryUtil.memAddress(data);
         // Some wrappers copy on the LWJGL stack: bound each call, never allocate megabytes there.
         for(int first=0;first<count;first+=512) {

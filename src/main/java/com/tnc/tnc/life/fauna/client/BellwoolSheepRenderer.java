@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class BellwoolSheepRenderer extends MobRenderer<BellwoolSheepEntity, BellwoolSheepModel> {
     private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/entity/bellwool_sheep.png");
+            ResourceLocation.fromNamespaceAndPath(TNMod.MODID, "textures/entity/pasture_sculpt/bellwool_sheep.png");
 
     public BellwoolSheepRenderer(EntityRendererProvider.Context context) {
         super(context, new BellwoolSheepModel(context.bakeLayer(BellwoolSheepModel.LAYER)), 0.6F);

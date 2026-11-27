@@ -1,0 +1,15 @@
+newmtl m0
+Ka 0 0 0
+Kd 1 1 1
+map_Kd tnc:item/weapon_surfaces/willow_leaf_dao_body
+
+newmtl m1
+Ka 0 0 0
+Kd 1 1 1
+map_Kd tnc:item/weapon_surfaces/willow_leaf_dao_haft
+
+newmtl m2
+Ka 0 0 0
+Kd 1 1 1
+map_Kd tnc:item/arsenal_26/willow_leaf_dao
+

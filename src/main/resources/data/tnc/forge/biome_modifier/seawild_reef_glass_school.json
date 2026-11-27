@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "#tnc:seawild_reef_glass_school",
+  "spawners": {
+    "type": "tnc:reef_glass_school",
+    "weight": 9,
+    "minCount": 1,
+    "maxCount": 1
+  }
+}

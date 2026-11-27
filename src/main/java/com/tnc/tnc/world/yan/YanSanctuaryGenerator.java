@@ -178,12 +178,12 @@ public final class YanSanctuaryGenerator extends ChunkGenerator {
     @Override public void applyCarvers(WorldGenRegion region, long seed, RandomState state, BiomeManager biomes,
                                       StructureManager manager, ChunkAccess chunk, GenerationStep.Carving step) {}
 
-    private static BlockState ground(int x, int y, int z) {
+    private BlockState ground(int x, int y, int z) {
         if (y == 0) return Blocks.BEDROCK.defaultBlockState();
         if (y > 0 && y < FLOOR - GROUND_DEPTH) return Blocks.DEEPSLATE.defaultBlockState();
         if (y > 0 && y < FLOOR) return Blocks.BLACKSTONE.defaultBlockState();
         if (y < FLOOR || y > STRUCTURE_TOP) return Blocks.AIR.defaultBlockState();
-        return YanSanctuaryLayout.platform(x, y, z);
+        return repeatAltar ? YanOpeningAltar.block(x, y, z) : YanSanctuaryLayout.platform(x, y, z);
     }
 
     private DragonChunk dragonChunk(int x, int z) {
@@ -204,9 +204,9 @@ public final class YanSanctuaryGenerator extends ChunkGenerator {
 
     static BlockState dragonMaterial(short packed) { return Dragon.STONES[packed & MATERIAL_MASK].state; }
 
-    private static int top(int x, int z, Heightmap.Types type, short[] dragon) {
+    private int top(int x, int z, Heightmap.Types type, short[] dragon) {
         if (dragon != null) return dragonY(dragon[dragon.length - 1]) + 1;
-        if (Math.abs(x) > 37 || z < -45 || z > 56) return FLOOR + 1;
+        if (Math.abs(x) > (repeatAltar ? YanOpeningAltar.EDGE : 37) || z < -45 || z > 56) return FLOOR + 1;
         for (int y = STRUCTURE_TOP; y >= FLOOR; y--) {
             if (type.isOpaque().test(ground(x, y, z))) return y + 1;
         }

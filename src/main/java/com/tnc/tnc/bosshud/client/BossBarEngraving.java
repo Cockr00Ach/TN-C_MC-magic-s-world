@@ -14,24 +14,47 @@ final class BossBarEngraving {
 
     static void draw(GuiGraphics g,BossHudTheme t,Component name,BossHudNetwork.Snapshot data,
                      int x,int y,int w,boolean compact,float progress,float ghost,double time){
+        boolean sanctum=com.tnc.tnc.sanctum.SanctumAppearance.HUD.equals(data.type());
         int a=t.accent,l=t.light,s=t.shade;
+        if(sanctum&&data.phase()==2){a=0xBD3446;l=0xFFD3BA;s=0x360C16;}
+        if(sanctum&&data.phase()==3){a=0xB45769;l=0xE5ACA6;s=0x160B18;}
         if(t==BossHudTheme.CANGLAN&&data.phase()==2){a=0x86B9CA;l=0xDEF0ED;s=0x253E51;}
         int by=y+(compact?18:25),h=compact?5:7;
         int metal=argb(255,BossHudRules.mix(a,0x9B9180,.34)),edge=argb(255,BossHudRules.mix(l,0xAAA69C,.34));
         int shadow=argb(255,BossHudRules.mix(s,0x12171D,.55));
-        BossBarMaterials.draw(g,t,data.phase(),x,by,w,h,progress,ghost,time);
+        BossBarMaterials.draw(g,t,sanctum,data.phase(),x,by,w,h,progress,ghost,time);
         g.pose().pushPose();g.pose().translate(x-20,by+h/2F,0);
-        BossHudPortraits.draw(g,t);
+        BossHudPortraits.draw(g,t,sanctum?data.phase():0);
         g.pose().popPose();
 
         var font=Minecraft.getInstance().font;
-        String title=font.plainSubstrByWidth(name.getString(),Math.max(24,w-66));
-        g.drawCenteredString(font,title,x+w/2,y,0xFFE9E4D9);
+        String title=name.getString();
+        if(sanctum&&data.phase()==3){
+            var glyphs=Component.literal(title).withStyle(net.minecraft.ChatFormatting.BOLD).getVisualOrderText();
+            int titleWidth=Math.max(1,font.width(glyphs));
+            float scale=Math.min(compact?1F:1.18F,Math.max(24,w-46)/(float)titleWidth);
+            g.pose().pushPose();
+            g.pose().translate(x+w/2F,y,0);
+            g.pose().scale(scale,scale,1);
+            g.drawString(font,glyphs,-titleWidth/2+1,1,0xFF500817,false);
+            g.drawString(font,glyphs,-titleWidth/2,0,0xFF000000|com.tnc.tnc.sanctum.SanctumAppearance.TRUE_NAME_RED,false);
+            g.pose().popPose();
+        }else if(sanctum){
+            float scale=Math.min(1F,Math.max(24,w-46)/(float)Math.max(1,font.width(title)));
+            text(g,title,x+w/2F,y,scale,0xFFE9E4D9,0);
+        }else{
+            g.drawCenteredString(font,font.plainSubstrByWidth(title,Math.max(24,w-66)),x+w/2,y,0xFFE9E4D9);
+        }
         String percent=Math.round(progress*100)+"%";
         text(g,percent,x+w,y+1,.75F,0xC5C5C5BF,1);
         if(!compact){
             boolean zh=Minecraft.getInstance().options.languageCode.startsWith("zh");
-            text(g,zh?t.subtitleZh:t.subtitleEn,x+w/2F,y+13,.6F,argb(155,BossHudRules.mix(a,0xC1B8A2,.45)),0);
+            String subtitle=zh?t.subtitleZh:t.subtitleEn;
+            if(sanctum) subtitle=switch(data.phase()){
+                case 1 -> zh?"守曦圣像":"THE VIGIL";
+                case 2 -> zh?"泣血圣使":"THE WEEPING SAINT";
+                default -> zh?"堕日真身":"THE FALLEN SUN";};
+            text(g,subtitle,x+w/2F,y+13,.6F,argb(155,BossHudRules.mix(a,0xC1B8A2,.45)),0);
         }
         int iy=by+h+17,total=Math.max(1,data.phases()),phase=BossHudRules.phase(data.phase(),total);
         // Phase markers resemble small engraved notches, with no repeated gemstone badges.

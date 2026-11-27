@@ -14,16 +14,19 @@ import java.util.Map;
 public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
     private final ModelPart root;
     private final String species;
+    private final PastureSkin skin;
     private final Map<String, ModelPart> bones = new LinkedHashMap<>();
     private float glowStrength = 1.0F;
 
     public PastureAnimalModel(ModelPart root, String species) {
         this.root = root;
         this.species = species;
+        skin = new PastureSkin(species, root, PastureGeometry.bones(species));
         bones.put("root", root);
         for (String[] pair : PastureGeometry.bones(species)) {
             bones.put(pair[0], bones.get(pair[1]).getChild(pair[0]));
         }
+        skin.bindArticulatedParts(bones);
     }
 
     private void turn(String bone, float x, float y, float z) {
@@ -42,11 +45,29 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
         ModelPart p = bones.get(bone);
         if (p != null) p.visible = visible;
     }
+    private void step(String upper, String lower, float phase, float amplitude, boolean hind) {
+        ModelPart leg = bones.get(upper);
+        if (leg == null) return;
+        float stride = Mth.cos(phase)*amplitude;
+        leg.xRot += stride;
+        ModelPart shin = bones.get(lower);
+        if (shin != null) {
+            float swing = Math.max(0f, -Mth.sin(phase));
+            float direction = hind ? -1 : 1;
+            shin.xRot += direction*swing*swing*amplitude*.68f;
+            // Straight stance compensates for arc shortening at the planted hoof.
+            leg.y += (1-Mth.cos(stride))*shin.y*1.25f*(1-swing);
+            leg.y -= swing*amplitude*.42f;
+        }
+    }
     private void walk(float swing, float amount, float pace, float strength) {
-        float a = Mth.cos(swing * pace) * amount * strength;
-        turn("leg_fl", a, 0, 0); turn("leg_br", a, 0, 0);
-        turn("leg_fr", -a, 0, 0); turn("leg_bl", -a, 0, 0);
-        turn("leg_ml", -a * .7F, 0, 0); turn("leg_mr", a * .7F, 0, 0);
+        float phase=swing*pace, a=amount*strength;
+        step("leg_fl","shin_fl",phase,a,false);
+        step("leg_fr","shin_fr",phase+Mth.PI,a,false);
+        step("leg_bl","shin_bl",phase+Mth.PI+.22f,a,true);
+        step("leg_br","shin_br",phase+.22f,a,true);
+        turn("leg_ml",-Mth.cos(phase)*a*.65f,0,0);
+        turn("leg_mr", Mth.cos(phase)*a*.65f,0,0);
     }
     private void flap(String left, String right, float phase, float strength) {
         float f = Mth.sin(phase) * strength;
@@ -56,9 +77,9 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
     @Override
     public void setupAnim(PastureAnimal entity, float limbSwing, float limbSwingAmount,
                           float ageInTicks, float netHeadYaw, float headPitch) {
-        root.getAllParts().forEach(p -> { p.resetPose(); p.visible = true; });
+        for (var p : bones.values()) { p.resetPose(); p.visible=true; p.xScale=1; p.yScale=1; p.zScale=1; }
         float partial = Mth.clamp(ageInTicks - entity.tickCount, 0.0F, 1.0F);
-        float t = entity.animationPhase(partial);
+        float t = entity.animationPhase(partial) + (entity.getUUID().hashCode() & 255) * (.02454F);
         float moving = Mth.clamp(limbSwingAmount, 0.0F, 1.0F);
         float touch = Mth.sin(entity.getAttackAnim(partial) * Mth.PI);
         float work = entity.isWorking() ? 1.0F : 0.0F;
@@ -66,8 +87,8 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
         if (entity.productionReady()) stored = Math.max(stored, .8F);
         float breath = Mth.sin(t) * .012F;
         scale("body", 1.0F, 1.0F + breath, 1.0F);
-        turn("head", headPitch * Mth.DEG_TO_RAD * .65F + touch * .2F,
-                netHeadYaw * Mth.DEG_TO_RAD * .6F, 0);
+        turn("head", Mth.clamp(headPitch,-48,48) * Mth.DEG_TO_RAD * .57F + touch * .2F,
+                Mth.clamp(netHeadYaw,-68,68) * Mth.DEG_TO_RAD * .53F, 0);
         glowStrength = (.25F + .75F * stored) * (.9F + .1F * Mth.sin(t * 1.3F));
         for (var entry : bones.entrySet()) {
             String name = entry.getKey();
@@ -118,7 +139,8 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
             }
             case "apiary_toad" -> {
                 float hop = Math.max(0, Mth.sin(limbSwing * 1.2F)) * moving;
-                root.y -= hop * 2.2F;
+                if (!entity.onGround()) turn("body",-.12F * hop,0,0);
+                else scale("body",1,1-hop*.035F,1);
                 turn("leg_bl", hop * -.5F, 0, 0); turn("leg_br", hop * -.5F, 0, 0);
                 turn("leg_fl", hop * .2F, 0, 0); turn("leg_fr", hop * .2F, 0, 0);
                 scale("throat", 1 + .08F * Mth.sin(t * 2), 1 + .1F * Math.max(0, Mth.sin(t * 2)) + work * .15F, 1);
@@ -126,7 +148,7 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
             }
             case "starfelt_hare" -> {
                 float hop = Math.max(0, Mth.sin(limbSwing * 1.8F)) * moving;
-                root.y -= hop * 2.5F; turn("body", hop * -.18F, 0, 0);
+                turn("body", hop * (entity.onGround() ? -.055F : -.17F), 0, 0);
                 turn("leg_fl", hop * -.45F, 0, 0); turn("leg_fr", hop * -.45F, 0, 0);
                 turn("leg_bl", hop * .65F, 0, 0); turn("leg_br", hop * .65F, 0, 0);
                 turn("ear_l", Mth.sin(t * 1.3F) * .05F - touch * .2F, 0, work * -.15F);
@@ -150,10 +172,17 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
                 scale("resource_glue", 1, .5F + stored, 1);
             }
             case "post_heron" -> {
-                walk(limbSwing, moving, .75F, .6F);
                 boolean airborne = !entity.onGround() && !entity.isInWaterOrBubble();
-                flap("wing_l", "wing_r", t * 4.5F, airborne ? .65F : touch * .25F);
-                flap("wing_l_tip", "wing_r_tip", t * 4.5F - .6F, airborne ? .35F : .02F);
+                if (airborne) {
+                    float flap=Mth.sin(t*2.8F);
+                    turn("wing_l",.10F,0,1.22F+.49F*flap);
+                    turn("wing_r",.10F,0,-1.22F-.49F*flap);
+                    flap("wing_l_tip","wing_r_tip",t*2.8F-.8F,.31F);
+                    turn("leg_fl",.91F,0,0); turn("leg_fr",1.01F,0,0);
+                } else {
+                    walk(limbSwing,moving,.75F,.52F);
+                    turn("wing_l",-.35F,-.18F,-.02F); turn("wing_r",-.35F,.18F,.02F);
+                }
                 turn("neck", touch * .32F + work * .12F, 0, 0);
                 turn("head", touch * -.32F + work * .17F, 0, 0);
                 scale("resource_postbag", 1 + stored * .15F, 1 + stored * .15F, 1);
@@ -169,10 +198,14 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
             }
             case "mirrorwing_moth" -> {
                 boolean airborne = !entity.onGround();
-                float f = airborne ? .65F : .09F + touch * .4F + work * .15F;
+                float f = airborne ? .61F : .035F + touch * .24F;
+                if (!airborne) {
+                    turn("wing_front_l",0,-.30F,.42F); turn("wing_front_r",0,.30F,-.42F);
+                    turn("wing_back_l",0,-.22F,.39F); turn("wing_back_r",0,.22F,-.39F);
+                }
                 flap("wing_front_l", "wing_front_r", t * (airborne ? 7 : 1.2F), f);
                 flap("wing_back_l", "wing_back_r", t * (airborne ? 7 : 1.2F) - .8F, f * .85F);
-                if (airborne) root.y += Mth.sin(t * 1.6F) * .25F;
+                if (airborne) root.y += Mth.sin(t * 1.6F) * .13F;
                 walk(limbSwing, moving, 1.2F, .1F);
                 turn("antenna_l", touch * -.3F, 0, 0); turn("antenna_r", touch * -.3F, 0, 0);
             }
@@ -204,10 +237,10 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
             }
             case "papersail_ray" -> {
                 boolean airborne = !entity.onGround();
-                float f = airborne ? .13F : .045F;
+                float f = airborne ? .21F + moving * .08F : .025F;
                 flap("wing_l", "wing_r", t * 1.9F, f + touch * .2F);
                 flap("wing_l_mid", "wing_r_mid", t * 1.9F - .55F, f * 1.2F);
-                flap("wing_l_tip", "wing_r_tip", t * 1.9F - 1.0F, f * 1.4F);
+                flap("wing_l_tip", "wing_r_tip", t * 1.9F - 1.15F, f * 1.4F);
                 if (airborne) { root.y += Mth.sin(t) * .45F; turn("leg_fl", .8F, 0, 0); turn("leg_fr", .8F, 0, 0); }
                 else walk(limbSwing, moving, 1.05F, .22F);
                 turn("tail", 0, Mth.sin(t * 1.4F) * .18F, 0);
@@ -226,7 +259,7 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
                 }
             }
             case "dewbound_whale" -> {
-                root.y += Mth.sin(t * .65F) * .65F;
+                root.y += entity.onGround() ? 0 : Mth.sin(t * .65F) * .34F;
                 turn("body", Mth.sin(t * .6F) * .035F - touch * .04F, 0, Mth.sin(t * .4F) * .035F);
                 flap("fin_front_l", "fin_front_r", t * 1.6F, .12F + moving * .15F + touch * .15F);
                 flap("fin_back_l", "fin_back_r", t * 1.6F - .9F, .1F + moving * .12F);
@@ -292,9 +325,14 @@ public final class PastureAnimalModel extends EntityModel<PastureAnimal> {
 
     @Override public void renderToBuffer(PoseStack pose, VertexConsumer consumer, int light, int overlay,
                                          float red, float green, float blue, float alpha) {
+        drawSkin(pose,consumer,light,overlay,red,green,blue,alpha,false);
+    }
+
+    public void drawSkin(PoseStack pose, VertexConsumer consumer, int light, int overlay,
+                         float red, float green, float blue, float alpha, boolean glow) {
         pose.pushPose();
         if (young) { pose.translate(0.0D, .675D, 0.0D); pose.scale(.55F, .55F, .55F); }
-        root.render(pose, consumer, light, overlay, red, green, blue, alpha);
+        skin.draw(pose, consumer, light, overlay, red, green, blue, alpha, glow);
         pose.popPose();
     }
 }

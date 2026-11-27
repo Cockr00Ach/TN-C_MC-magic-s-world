@@ -1,0 +1,1 @@
+{"loader":"tnc:botanical_mesh","render_type":"minecraft:cutout","ambientocclusion":false,"glow_enabled":true,"textures":{"plant":"tnc:block/botanical/ladder_vine","particle":"tnc:block/botanical/ladder_vine"},"geometry":"tnc:botanical_meshes/botanical_vine_segment_3.json"}

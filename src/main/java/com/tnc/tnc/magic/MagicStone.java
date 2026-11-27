@@ -220,6 +220,7 @@ public class MagicStone {
      * 也见过换世界后 {@code ServerTickEvent} 那条不再进来 —— 每条都单独能驱动 ✓。
      */
     public static void tickManaRegen(ServerPlayer serverPlayer) {
+        if (serverPlayer instanceof com.tnc.tnc.dungeon.mirror.MirrorSpellHand || com.tnc.tnc.dungeon.mirror.MirrorSilence.active(serverPlayer)) return;
         if (serverPlayer.level().isClientSide()) {
             return;
         }
@@ -299,6 +300,7 @@ public class MagicStone {
     // ------------------------------------------------------------------
 
     public static void refreshMaxMana(Player player, MagicStoneData data) {
+        if (com.tnc.tnc.dungeon.mirror.MirrorSilence.active(player)) return;
         int growth = 0;
         if (player instanceof ServerPlayer serverPlayer) {
             if (com.tnc.tnc.world.yan.YanPrologue.usingKit(serverPlayer)) return;
@@ -321,7 +323,11 @@ public class MagicStone {
     @Nullable
     public static MagicStoneData getOrNull(Player player) {
         var data=get(player).orElse(null);
-        if(data!=null&&player instanceof ServerPlayer p)data.setManaBlocked(p.hasEffect(com.tnc.tnc.arcana.ArcanaMealEffects.NO_MAGIC));
+        if (player instanceof com.tnc.tnc.dungeon.mirror.MirrorSpellHand) return data;
+        if(data!=null&&player instanceof ServerPlayer p){
+            data.setMirrorFrozen(com.tnc.tnc.dungeon.mirror.MirrorSilence.active(p));
+            data.setManaBlocked(p.hasEffect(com.tnc.tnc.arcana.ArcanaMealEffects.NO_MAGIC));
+        }
         if(data!=null&&player instanceof ServerPlayer p)data.setManaFreedom(com.tnc.tnc.arcana.ArcanaPhysiology.data(p).getLong("MealSunUntil")>com.tnc.tnc.arcana.ArcanaPhysiology.now(p));
         return data;
     }

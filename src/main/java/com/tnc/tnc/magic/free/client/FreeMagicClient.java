@@ -197,6 +197,10 @@ public final class FreeMagicClient {
             if(player!=null&&player.distanceToSqr(mc.player)<=4096)
                 ChantTextVisuals.draw(pose,BUFFER,camera,player,entry.getValue(),now,event.getPartialTick());
         }
+        if (recording && !CHANTS.containsKey(mc.player.getUUID())
+                && ElementalRuntime.context(mc.player) == com.tnc.tnc.magic.Element.FIRE) {
+            new FireCastVisuals(pose, BUFFER, now).gather(camera, mc.player.getEyePosition(event.getPartialTick()), mc.player.getLookAngle());
+        }
         for(var entry:CHANTS.entrySet()){
             var player=mc.level.getPlayerByUUID(entry.getKey());
             if(player==null||player.distanceToSqr(mc.player)>4096)continue;
@@ -205,7 +209,9 @@ public final class FreeMagicClient {
             double progress=c.confirmed()?Math.max(0,Math.min(1,(now-c.started())/c.duration())):0;
             var intent=shape==null?null:new FreeMagicIntent.Intent(shape,FreeMagicIntent.Mode.SINGLE,c.modifiers(),c.chantPower());
             if(c.confirmed())WaterCastVisuals.formation(pose,BUFFER,camera,player.getEyePosition(event.getPartialTick()),player.getLookAngle(),intent,c.count(),progress,true,now,c.targets());
-            else WaterCastVisuals.gather(pose,BUFFER,camera,player.getEyePosition(event.getPartialTick()),player.getLookAngle(),now);
+            else if (ElementalRuntime.context(player) == com.tnc.tnc.magic.Element.FIRE) {
+                new FireCastVisuals(pose, BUFFER, now).gather(camera, player.getEyePosition(event.getPartialTick()), player.getLookAngle());
+            } else WaterCastVisuals.gather(pose,BUFFER,camera,player.getEyePosition(event.getPartialTick()),player.getLookAngle(),now);
         }
         for(var shot:SHOTS.values()){
             var p=shot.packet();

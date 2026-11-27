@@ -319,6 +319,12 @@ minecraft {
                 property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
             }
             if (project.hasProperty('deepArcanaRegression')) {property 'forge.enabledGameTestNamespaces','tncarcana,tncjourney,tncdungeon';workingDirectory project.file('work/deep-arcana-regression-tests')}
+            if (project.hasProperty('sanctumTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncsanctum'
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                workingDirectory project.file('work/sanctum-server-tests')
+            }
             if (project.hasProperty('magicProgressionRegression')) {property 'forge.enabledGameTestNamespaces','tncarcana,tncjourney,tncdungeon,tncroute,tnccanglan';workingDirectory project.file('work/deep-arcana-regression-tests')}
             if (project.hasProperty('fullLandmarkTests')) property 'tnc.fullLandmarkTests', 'true'
             if (project.hasProperty('fullSkyIslandTests')) {
@@ -335,6 +341,12 @@ minecraft {
             if (project.hasProperty('skyAcademyTests')) {
                 property 'forge.enabledGameTestNamespaces', 'tncacademy'
                 workingDirectory project.file('work/sky-academy-server-tests')
+            }
+            if (project.hasProperty('echoMirrorTests')) {
+                property 'forge.enabledGameTestNamespaces', 'tncmirror'
+                property 'mixin.env.remapRefMap', 'true'
+                property 'mixin.env.refMapRemappingFile', file('build/createSrgToMcp/output.srg').absolutePath
+                workingDirectory project.file('work/echo-mirror-server-tests')
             }
             jvmArgs '-Xmx6G'
             // Recovery fixtures intentionally change blocks; never reuse a previous run's world.
@@ -418,7 +430,7 @@ dependencies {
     // Custom Molang queries use GeckoLib's embedded parser API; runtime still comes from GeckoLib.
     compileOnly files(zipTree('libs/geckolib-4.8.4.jar').matching { include 'META-INF/jarjar/mclib-20.jar' })
 
-    if (project.hasProperty('dungeonMobTests') || project.hasProperty('dungeonTests') || project.hasProperty('warriorTests')) {
+    if (project.hasProperty('dungeonMobTests') || project.hasProperty('dungeonTests') || project.hasProperty('warriorTests') || project.hasProperty('sanctumTests')) {
         runtimeOnly fg.deobf('geckolib:geckolib:4.8.4')
     }
     testImplementation platform('org.junit:junit-bom:5.10.2')
@@ -504,6 +516,13 @@ tasks.named('processResources', ProcessResources).configure {
 // When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.
 // See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
 tasks.named('processResources', ProcessResources).configure {
+    // Headless Forge runs do not load PCL's KubeJS pack. Supply its real island
+    // manifest when a GameTest exercises a populated island across server ticks.
+    if (project.hasProperty('skyAcademyTests') && gradle.startParameter.taskNames.any { it.tokenize(':').last() == 'runGameTestServer' }) {
+        from(file('modpack/元素觉醒1.4.3-魔改版-20260915/kubejs')) {
+            include 'data/tnc/sky_island/manifest.json'
+        }
+    }
     var replaceProperties = [
             minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
             forge_version: forge_version, forge_version_range: forge_version_range,

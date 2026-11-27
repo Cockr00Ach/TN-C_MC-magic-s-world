@@ -13,7 +13,7 @@ public final class ArcanaBeacon {
     private static final class Cast {final ServerPlayer player;final ResourceLocation spell;final boolean release;RouteNodeEntity tower;int cost;boolean held,paid;Cast(ServerPlayer p,ResourceLocation s,boolean r){player=p;spell=s;release=r;}}
     private static final ThreadLocal<Deque<Cast>> CALLS=ThreadLocal.withInitial(ArrayDeque::new);
     public static long begun,committed,snapshots;
-    private static boolean eligible(ServerPlayer p,SpellCatalog.Entry e){return e!=null&&e.tier()>=3&&p.getMainHandItem().getItem() instanceof ElementWands.Wand w&&w.design.tier()>=3&&w.design.element()==e.element();}
+    private static boolean eligible(ServerPlayer p,SpellCatalog.Entry e){return !(p instanceof com.tnc.tnc.dungeon.mirror.MirrorSpellHand)&&!com.tnc.tnc.dungeon.mirror.MirrorSilence.active(p)&&e!=null&&e.tier()>=3&&p.getMainHandItem().getItem() instanceof ElementWands.Wand w&&w.design.tier()>=3&&w.design.element()==e.element();}
     public static int reserved(RouteNodeEntity tower){int total=0;for(var c:CALLS.get())if(c.tower==tower&&c.held)total+=c.cost;return total;}
     public static boolean affordable(ServerPlayer p,SpellCatalog.Entry e,int cost){var tower=eligible(p,e)?ArcanaRealms.beacon(p):null;return tower!=null&&tower.mana-reserved(tower)>=cost;}
     public static void enter(ServerPlayer p,ResourceLocation spell,boolean release){CALLS.get().push(new Cast(p,spell,release));}

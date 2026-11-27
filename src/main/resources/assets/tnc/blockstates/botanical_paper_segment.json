@@ -1,13 +1,1 @@
-{
-  "variants": {
-    "segment=1": {
-      "model": "tnc:block/botanical_paper_segment"
-    },
-    "segment=2": {
-      "model": "tnc:block/botanical_paper_segment"
-    },
-    "segment=3": {
-      "model": "tnc:block/botanical_paper_segment"
-    }
-  }
-}
+{"variants":{"segment=1":{"model":"tnc:block/botanical_paper_segment"},"segment=2":{"model":"tnc:block/botanical_paper_segment_2"},"segment=3":{"model":"tnc:block/botanical_paper_segment_3"}}}

@@ -1,0 +1,1 @@
+{"loader":"tnc:botanical_mesh","render_type":"minecraft:cutout","ambientocclusion":false,"glow_enabled":true,"textures":{"plant":"tnc:block/botanical/paper_tree","particle":"tnc:block/botanical/paper_tree"},"geometry":"tnc:botanical_meshes/botanical_paper_segment_2.json"}

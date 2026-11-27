@@ -55,6 +55,8 @@ public class TNMod
             BLOCKS.register("gamble_table", com.tnc.tnc.casino.machine.TNGambleTableBlock::new);
     public static final RegistryObject<Block> MANA_ROOT =
             BLOCKS.register("mana_root", com.tnc.tnc.life.ManaRoot.RootBlock::new);
+    public static final RegistryObject<com.tnc.tnc.skyacademy.WindChimePillar> WIND_CHIME_PILLAR =
+            BLOCKS.register("wind_chime_pillar", com.tnc.tnc.skyacademy.WindChimePillar::new);
     /** 演武终端：天空岛演武场正中的那台机器（场景方块，不给拆）。 */
     public static final RegistryObject<Block> PRACTICE_TERMINAL =
             BLOCKS.register("practice_terminal", com.tnc.tnc.warrior.PracticeTerminalBlock::new);
@@ -334,6 +336,7 @@ public class TNMod
         //   实体类型 / 属性表 / 刷怪蛋三样都在 DungeonMobRegistration 里。
         //   ⚠️ 这一行漏了 ⇒ DeferredRegister 没挂上总线 ⇒ 12 个实体**静默不存在** ✗
         com.tnc.tnc.dungeon.DungeonMobRegistration.register(modEventBus);
+        com.tnc.tnc.dungeon.mirror.MirrorEntities.register(modEventBus);
         // 火山巨龟重踏火环的专用粒子类型（客户端自定义粒子，共享同一个环半径）。
         com.tnc.tnc.boss.fire.TortoiseParticles.register(modEventBus);
 

@@ -20,9 +20,12 @@ public final class EpicBossHud {
     private static long draws,foreign;private static final Set<String> DRAWN=new HashSet<>();
     private static void session(){var current=Minecraft.getInstance().level;if(current!=level){BARS.clear();level=current;ticks=0;}}
     public static void accept(BossHudNetwork.Snapshot packet){
-        session();if(level==null||BossHudTheme.forType(packet.type())==null)return;
+        session();if(level==null)return;
+        boolean sanctum=com.tnc.tnc.sanctum.SanctumAppearance.HUD.equals(packet.type());
         var theme=BossHudTheme.forType(packet.type());
-        var clean=new BossHudNetwork.Snapshot(packet.bar(),packet.entity(),packet.type(),BossHudRules.health(packet.health(),packet.maximum()),BossHudRules.maximum(packet.maximum()),BossHudRules.phase(packet.phase(),theme.phases),theme.phases);
+        if(!sanctum&&theme==null)return;
+        int phases=sanctum?3:theme.phases;
+        var clean=new BossHudNetwork.Snapshot(packet.bar(),packet.entity(),packet.type(),BossHudRules.health(packet.health(),packet.maximum()),BossHudRules.maximum(packet.maximum()),BossHudRules.phase(packet.phase(),phases),phases);
         var entry=BARS.get(packet.bar());
         if(entry==null||!entry.snapshot.entity().equals(packet.entity())){
             if(BARS.size()>=BossHudRules.CACHE_LIMIT)BARS.remove(BARS.keySet().iterator().next());BARS.put(packet.bar(),new Entry(clean,ticks));
@@ -39,7 +42,10 @@ public final class EpicBossHud {
         if(com.tnc.tnc.world.ink.client.InkEncounterCamera.active()||com.tnc.tnc.world.wind.client.CanglanCinematicCamera.active()){event.setCanceled(true);event.setIncrement(0);return;}
         var mc=Minecraft.getInstance();boolean compact=BARS.size()>1;int width=BossHudRules.width(event.getWindow().getGuiScaledWidth());
         long now=net.minecraft.Util.getMillis();var p=entry.snapshot;entry.trail.update(BossHudRules.progress(p.health(),p.maximum()),p.phase(),now);
-        EpicBossBarArt.draw(event.getGuiGraphics(),BossHudTheme.forType(p.type()),event.getBossEvent().getName(),p,
+        if(com.tnc.tnc.sanctum.SanctumAppearance.HUD.equals(p.type())){
+            BossBarEngraving.draw(event.getGuiGraphics(),BossHudTheme.APOLLO,event.getBossEvent().getName(),p,
+                    event.getWindow().getGuiScaledWidth()/2-width/2,event.getY(),width,compact,entry.trail.shown(),entry.trail.ghost(),now/1000.0);
+        }else EpicBossBarArt.draw(event.getGuiGraphics(),BossHudTheme.forType(p.type()),event.getBossEvent().getName(),p,
                 event.getWindow().getGuiScaledWidth()/2-width/2,event.getY(),width,compact,entry.trail.shown(),entry.trail.ghost(),now/1000.0);
         event.setCanceled(true);event.setIncrement(BossHudRules.rowHeight(compact));
         if(AUDIT){draws++;DRAWN.add(p.type());}

@@ -60,11 +60,12 @@ public final class DownedCombat {
         long present=p.server.getPlayerList().getPlayers().stream().filter(DownedCombat::eligible)
                 .filter(q->(q==p||q.isAlive())&&CombatTeams.group(q).equals(group)).count();
         boolean dungeon=com.tnc.tnc.dungeon.DungeonService.active(p);
-        boolean solo=dungeon?com.tnc.tnc.dungeon.DungeonService.solo(p):present<=1;
+        boolean sanctum=com.tnc.tnc.sanctum.UnlitSanctum.rescueGroup(p)!=null;
+        boolean solo=sanctum?com.tnc.tnc.sanctum.UnlitSanctum.solo(p):dungeon?com.tnc.tnc.dungeon.DungeonService.solo(p):present<=1;
         var tag=data(p);long tick=now(p);
-        if(solo&&(dungeon?!com.tnc.tnc.dungeon.DungeonService.takeSoloDown(p):!CombatRules.canSoloDown(tick,tag.getLong("soloUntil"))))return false;
+        if(solo&&(sanctum?!com.tnc.tnc.sanctum.UnlitSanctum.useSoloRescue(p):dungeon?!com.tnc.tnc.dungeon.DungeonService.takeSoloDown(p):!CombatRules.canSoloDown(tick,tag.getLong("soloUntil"))))return false;
         tag.putBoolean("downed",true);tag.putBoolean("solo",solo);tag.putString("group",group);
-        if(solo)tag.putLong("soloUntil",tick+CombatRules.SOLO_COOLDOWN);
+        if(solo&&!sanctum)tag.putLong("soloUntil",tick+CombatRules.SOLO_COOLDOWN);
         tag.putDouble("x",p.getX());tag.putDouble("y",p.getY());tag.putDouble("z",p.getZ());
         tag.putString("dimension",p.level().dimension().location().toString());
         p.setHealth(1);p.stopRiding();p.stopUsingItem();p.setDeltaMovement(Vec3.ZERO);
@@ -128,6 +129,7 @@ public final class DownedCombat {
     public static void death(LivingDeathEvent e) {
         if(e.getEntity() instanceof ServerPlayer p&&!e.isCanceled()){
             if(enter(p))e.setCanceled(true);
+            else if(com.tnc.tnc.sanctum.UnlitSanctum.retry(p))e.setCanceled(true);
             else if(com.tnc.tnc.dungeon.DungeonService.active(p)){e.setCanceled(true);com.tnc.tnc.dungeon.DungeonService.fail(p);}
         }
     }
@@ -195,6 +197,7 @@ public final class DownedCombat {
         }
     }
     public static void wipe(List<ServerPlayer> members) {
+        if(!members.isEmpty()&&com.tnc.tnc.sanctum.UnlitSanctum.handleWipe(members.get(0)))return;
         if(!members.isEmpty()&&com.tnc.tnc.dungeon.DungeonService.active(members.get(0))){com.tnc.tnc.dungeon.DungeonService.fail(members.get(0));return;}
         for(var p:members)if(isDowned(p)) {
             data(p).putBoolean("downed",false);release(p);RESCUES.remove(p.getUUID());

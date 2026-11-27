@@ -1,0 +1,1 @@
+{"loader":"tnc:botanical_mesh","render_type":"minecraft:cutout","ambientocclusion":false,"glow_enabled":true,"textures":{"plant":"tnc:block/seagarden/waking_tide_fan","particle":"tnc:block/seagarden/waking_tide_fan"},"geometry":"tnc:seagarden_meshes/waking_tide_fan_0.json"}

@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TravelMusicTimingTest {
     @Test
     void configuredRangesMatchTheApprovedMinutes() {
-        assertEquals(2 * 60 * 20, TravelMusicTiming.INITIAL_MIN_DELAY_TICKS);
-        assertEquals(4 * 60 * 20, TravelMusicTiming.INITIAL_MAX_DELAY_TICKS);
-        assertEquals(270 * 20, TravelMusicTiming.MIN_DELAY_TICKS);
-        assertEquals(330 * 20, TravelMusicTiming.MAX_DELAY_TICKS);
+        assertEquals(10 * 60 * 20, TravelMusicTiming.INITIAL_MIN_DELAY_TICKS);
+        assertEquals(15 * 60 * 20, TravelMusicTiming.INITIAL_MAX_DELAY_TICKS);
+        assertEquals(10 * 60 * 20, TravelMusicTiming.MIN_DELAY_TICKS);
+        assertEquals(15 * 60 * 20, TravelMusicTiming.MAX_DELAY_TICKS);
     }
 
     @Test

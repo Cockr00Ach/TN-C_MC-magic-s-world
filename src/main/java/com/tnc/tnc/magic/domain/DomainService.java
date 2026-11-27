@@ -86,6 +86,7 @@ public final class DomainService {
 
     /** 玩家 → 下一次可以出手的 tick ✓。 */
     private static final Map<UUID, Long> NEXT = new HashMap<>();
+    public static void cancelPending(UUID owner) { PENDING.remove(owner); NEXT.remove(owner); }
 
     /** 一次预警中的打击。 */
     private record Pending(ServerLevel level, Vec3 at, int targetId, long due,
@@ -150,6 +151,10 @@ public final class DomainService {
                 || player.level().isClientSide()) {
             return;
         }
+        tickDomain(player);
+    }
+    public static void tickDomain(ServerPlayer player) {
+        if (com.tnc.tnc.dungeon.mirror.MirrorSilence.active(player)) return;
         ServerLevel level = player.serverLevel();
         long now = level.getGameTime();
         prune(now);
@@ -257,13 +262,17 @@ public final class DomainService {
 
         // ② 敌人：掉血 + 每两秒染一次本系状态 ✓
         boolean second = level.getGameTime() % (DomainSpells.AURA_INTERVAL * 2L) == 0L;
-        for (LivingEntity target : around(level, center, radius)) {
+        for (LivingEntity target : around(player, center, radius)) {
             applyMagic(player, target, DomainSpells.AURA_DAMAGE);
             auraFlavour(player, domain, target, second);
         }
 
         // ③ 光领域：站在领域里的玩家（含自己）持续回血 ✓
         if (element == Element.LIGHT) {
+            if (player instanceof com.tnc.tnc.dungeon.mirror.MirrorSpellHand) {
+                player.heal(DomainSpells.AURA_HEAL);
+                return;
+            }
             AABB box = new AABB(center.x - radius, center.y - 2.0D, center.z - radius,
                     center.x + radius, center.y + 3.0D, center.z + radius);
             for (Player ally : level.getEntitiesOfClass(Player.class, box, Player::isAlive)) {
@@ -406,7 +415,7 @@ public final class DomainService {
         }
 
         // ③ 一直控制：动不了、看不见、还挂着标记 ✓
-        for (LivingEntity target : around(level, at, 2.0D)) {
+        for (LivingEntity target : around(owner, at, 2.0D)) {
             target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN,
                     DomainSpells.GRIP_TICKS, 6, false, true, true));
             target.addEffect(new MobEffectInstance(MobEffects.DARKNESS,
@@ -498,6 +507,10 @@ public final class DomainService {
         // 队友（含自己）回血：作者要的是"领域"，站在里面就该有好处 ✓
         AABB box = new AABB(at.x - domain.radius(), at.y - 2.0D, at.z - domain.radius(),
                 at.x + domain.radius(), at.y + 3.0D, at.z + domain.radius());
+        if (owner instanceof com.tnc.tnc.dungeon.mirror.MirrorSpellHand) {
+            if(box.contains(owner.position())) owner.heal(DomainSpells.LIGHT_HEAL);
+            return;
+        }
         for (Player ally : level.getEntitiesOfClass(Player.class, box, Player::isAlive)) {
             if (ally.isSpectator()) {
                 continue;
@@ -516,7 +529,7 @@ public final class DomainService {
     private static List<LivingEntity> damageAround(ServerPlayer owner, ServerLevel level, Vec3 at,
                                                    DomainSpells.Domain domain, float damage) {
         List<LivingEntity> hit = new ArrayList<>();
-        for (LivingEntity target : around(level, at, domain.radius())) {
+        for (LivingEntity target : around(owner, at, domain.radius())) {
             applyMagic(owner, target, damage);
             hit.add(target);
         }
@@ -540,10 +553,10 @@ public final class DomainService {
     }
 
     /** 落点周围的可打目标（排除自己/友军/玩家）✓。 */
-    private static List<LivingEntity> around(ServerLevel level, Vec3 at, double radius) {
+    private static List<LivingEntity> around(ServerPlayer owner, Vec3 at, double radius) {
         AABB box = new AABB(at.x - radius, at.y - 1.6D, at.z - radius,
                 at.x + radius, at.y + 3.0D, at.z + radius);
-        return level.getEntitiesOfClass(LivingEntity.class, box, DomainService::hittable);
+        return owner.serverLevel().getEntitiesOfClass(LivingEntity.class, box,t->hittable(owner,t));
     }
 
     // ------------------------------------------------------------------
@@ -676,7 +689,8 @@ public final class DomainService {
     }
 
     /** 能不能打：活着、不是观察者、不是玩家 ✓。 */
-    private static boolean hittable(LivingEntity entity) {
+    private static boolean hittable(ServerPlayer owner, LivingEntity entity) {
+        if(owner instanceof com.tnc.tnc.dungeon.mirror.MirrorSpellHand) return com.tnc.tnc.dungeon.mirror.MirrorSpells.enemy(owner,entity);
         return entity.isAlive() && !entity.isSpectator() && !(entity instanceof Player);
     }
 
@@ -690,7 +704,7 @@ public final class DomainService {
         ServerLevel level = player.serverLevel();
         long now = level.getGameTime();
         List<LivingEntity> candidates = new ArrayList<>(level.getEntitiesOfClass(LivingEntity.class,
-                player.getBoundingBox().inflate(DomainSpells.RADIUS), DomainService::hittable));
+                player.getBoundingBox().inflate(DomainSpells.RADIUS), t->hittable(player,t)));
         candidates.removeIf(e -> e.isAlliedTo(player) || e == player);
         List<LivingEntity> beaten = new ArrayList<>();
         for (LivingEntity candidate : candidates) {

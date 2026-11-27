@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tnc:titan_tidekelp",
+          "conditions": [
+            {
+              "condition": "minecraft:block_state_property",
+              "block": "tnc:titan_tidekelp",
+              "properties": {
+                "part": "tip"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

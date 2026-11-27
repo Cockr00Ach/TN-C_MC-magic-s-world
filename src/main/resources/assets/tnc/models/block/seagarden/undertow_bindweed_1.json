@@ -1,0 +1,1 @@
+{"loader":"tnc:botanical_mesh","render_type":"minecraft:cutout","ambientocclusion":false,"glow_enabled":true,"textures":{"plant":"tnc:block/seagarden/undertow_bindweed","particle":"tnc:block/seagarden/undertow_bindweed"},"geometry":"tnc:seagarden_meshes/undertow_bindweed_1.json"}

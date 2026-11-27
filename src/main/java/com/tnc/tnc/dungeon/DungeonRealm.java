@@ -12,7 +12,7 @@ public final class DungeonRealm {
     public static final ResourceKey<Level> KEY=ResourceKey.create(net.minecraft.core.registries.Registries.DIMENSION,DungeonContent.id("rift_dungeons"));
     private static final ThreadLocal<Integer> WRITING=ThreadLocal.withInitial(()->0);
     public static boolean inside(Level l){return l.dimension().equals(KEY);}
-    public static boolean locked(Level l){return !l.isClientSide&&inside(l)&&WRITING.get()==0;}
+    public static boolean locked(Level l){return !l.isClientSide&&(inside(l)||l.dimension().equals(com.tnc.tnc.sanctum.UnlitSanctum.LEVEL))&&WRITING.get()==0;}
     public static void write(Runnable action){int old=WRITING.get();WRITING.set(old+1);try{action.run();}finally{WRITING.set(old);}}
     public static BlockPos base(DungeonData.Run run,int floor){long x=run.slot%1024,z=run.slot/1024;int f=Math.max(0,floor-1);return new BlockPos((int)(x*4096)+(f%6)*384,80,(int)(z*4096)+(f/6)*384);}
     public static BlockPos center(DungeonData.Run run,DungeonGraph.Room room){return base(run,run.floor).offset(room.cell().x()*40,0,room.cell().z()*40);}
@@ -49,7 +49,8 @@ public final class DungeonRealm {
       if(room.kind()==DungeonGraph.Kind.COMBAT){furnishing(a,o,r,room);if(r.theme==DungeonTheme.TIDE)for(int x=-4;x<=4;x++)for(int z:new int[]{-7,7}){cell(a,o.offset(x,0,z),Blocks.SEA_LANTERN.defaultBlockState());cell(a,o.offset(x,1,z),Blocks.BLUE_STAINED_GLASS.defaultBlockState());}}
       if(room.kind()==DungeonGraph.Kind.TREASURE)cell(a,o.above(),DungeonContent.CACHE.defaultBlockState());
       if(room.kind()==DungeonGraph.Kind.EVENT||room.kind()==DungeonGraph.Kind.REST)cell(a,o.above(),DungeonContent.CONSOLE.defaultBlockState());
-      if(room.kind()==DungeonGraph.Kind.EXIT||room.kind()==DungeonGraph.Kind.GUARDIAN){cell(a,o.offset(0,1,3),DungeonContent.WAYSTONE.defaultBlockState());for(int x=-2;x<=2;x++)cell(a,o.offset(x,0,3),r.theme.lamp());}
+      if(com.tnc.tnc.dungeon.mirror.MirrorArena.site(r,room))com.tnc.tnc.dungeon.mirror.MirrorArena.build(a,r,room);
+      else if(room.kind()==DungeonGraph.Kind.EXIT||room.kind()==DungeonGraph.Kind.GUARDIAN){cell(a,o.offset(0,1,3),DungeonContent.WAYSTONE.defaultBlockState());for(int x=-2;x<=2;x++)cell(a,o.offset(x,0,3),r.theme.lamp());}
     }
     for(var room:graph.rooms)com.tnc.tnc.dungeon.leyline.LeylineService.build(a,r,room);
     var secret=graph.rooms.stream().filter(q->q.kind()==DungeonGraph.Kind.TREASURE&&!com.tnc.tnc.dungeon.leyline.LeylineService.puzzle(r,q)).toList();

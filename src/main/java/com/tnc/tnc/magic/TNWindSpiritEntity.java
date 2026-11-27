@@ -158,7 +158,7 @@ public class TNWindSpiritEntity extends Entity implements GeoEntity {
         if (this.ownerId == null || !(this.level() instanceof ServerLevel serverLevel)) {
             return null;
         }
-        ServerPlayer owner = serverLevel.getServer().getPlayerList().getPlayer(this.ownerId);
+        ServerPlayer owner = com.tnc.tnc.dungeon.mirror.MirrorSpellHand.owner(serverLevel, this.ownerId);
         if (owner == null || owner.isRemoved() || owner.level() != this.level()) {
             return null;
         }

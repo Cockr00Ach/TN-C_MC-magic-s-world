@@ -424,12 +424,15 @@ public class MagicStoneData {
     // ------------------------------------------------------------------
 
     private transient boolean manaFreedom,manaBlocked;public void setManaBlocked(boolean b){manaBlocked=b;}
+    private transient boolean mirrorFrozen;
+    public void setMirrorFrozen(boolean frozen) { mirrorFrozen = frozen; }
     public void setManaFreedom(boolean active){manaFreedom=active;}
     public int getMana() {
         return manaFreedom?maxMana:mana;
     }
 
     public void setMana(int value) {
+        if (mirrorFrozen) return;
         this.mana = clamp(value, 0, Math.max(0, maxMana));
     }
 
@@ -439,7 +442,7 @@ public class MagicStoneData {
 
     /** 施法消耗；不够就返回 false（调用方决定怎么提示）。 */
     public boolean spendMana(int cost) {
-        if(manaBlocked)return false;
+        if(manaBlocked || mirrorFrozen)return false;
         if(manaFreedom)return cost>=0&&cost<=maxMana;
         if (cost < 0 || mana < cost) {
             return false;

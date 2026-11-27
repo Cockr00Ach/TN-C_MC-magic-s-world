@@ -350,7 +350,12 @@ public final class MagicStoneHud {
         //    中线按**贴图坐标**算再除以 2，比先用 0.5 倍取整更准。
         //    字号由 TEXT_SCALE 控制：先把原点挪到轨道中线，再缩放，最后以原点为中心画，
         //    这样改缩放不用重算坐标。
-        String text = mana + "/" + max;
+        boolean mirrorSilence = com.tnc.tnc.dungeon.mirror.client.MirrorEffects.silent();
+        if (mirrorSilence) {
+            graphics.fill(x + TRACK_DX, y + TRACK_DY - 1, x + TRACK_DX + TRACK_DW,
+                    y + TRACK_DY + TRACK_H / 2 + 1, 0xf04b4858);
+        }
+        String text = mirrorSilence ? "静默 · 锁定" : mana + "/" + max;
         var font = minecraft.font;
         int trackCx = x + (TRACK_U + TRACK_W / 2) / 2;
         int trackCy = y + (TRACK_V + TRACK_H / 2) / 2;

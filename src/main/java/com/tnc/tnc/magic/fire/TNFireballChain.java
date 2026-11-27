@@ -157,7 +157,7 @@ public final class TNFireballChain {
         for (var it = RAINS.entrySet().iterator(); it.hasNext();) {
             var rain = it.next().getValue();
             if (rain.level.getServer() != event.getServer()) continue;
-            var caster = rain.level.getEntity(rain.owner) instanceof ServerPlayer player ? player : null;
+            var caster = com.tnc.tnc.dungeon.mirror.MirrorSpellHand.owner(rain.level,rain.owner);
             if (caster == null || !caster.isAlive() || caster.isSpectator() || caster.level() != rain.level
                     || DownedCombat.isDowned(caster) || rain.level.getGameTime() >= rain.ends) {
                 it.remove();

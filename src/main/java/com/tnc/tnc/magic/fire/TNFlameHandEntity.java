@@ -106,8 +106,7 @@ public class TNFlameHandEntity extends Entity {
         if (casterId == null || !(level() instanceof ServerLevel server)) {
             return null;
         }
-        Entity e = server.getEntity(casterId);
-        return e instanceof ServerPlayer player ? player : null;
+        return com.tnc.tnc.dungeon.mirror.MirrorSpellHand.owner(server,casterId);
     }
 
     /**

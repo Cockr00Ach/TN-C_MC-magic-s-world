@@ -61,6 +61,7 @@ public final class TravelMusicController {
     private static int currentAge;
     private static int refreshTicks;
     private static boolean inWorld;
+    private static boolean inVenue;
 
     private TravelMusicController() {
     }
@@ -102,8 +103,18 @@ public final class TravelMusicController {
         // Indoors the inn owns the channel, including its initial ten seconds of silence.
         boolean casinoMusic=com.tnc.tnc.casino.client.CasinoMusicController.tick(minecraft);
         if(com.tnc.tnc.tavern.client.TavernMusicController.tick(minecraft)||casinoMusic){
-            if(currentTrack!=null)sounds.stop(currentTrack);currentTrack=null;currentAge=0;waitTicks=100;
-            if(bossTrack!=null)sounds.stop(bossTrack);bossTrack=null;bossAge=0;return;
+            if (currentTrack != null) sounds.stop(currentTrack);
+            if (bossTrack != null) sounds.stop(bossTrack);
+            currentTrack = null;
+            currentAge = 0;
+            bossTrack = null;
+            bossAge = 0;
+            inVenue = true;
+            return;
+        }
+        if (inVenue) {
+            inVenue = false;
+            waitTicks = randomDelay();
         }
         if(tickBossMusic(minecraft,sounds))return;
 
@@ -167,6 +178,7 @@ public final class TravelMusicController {
                 sounds.stop(bossTrack);
                 bossTrack = null;
                 bossAge = 0;
+                waitTicks = randomDelay();
                 LOGGER.info("[TN-C Music] boss music stopped");
             }
             return false;
@@ -273,6 +285,7 @@ public final class TravelMusicController {
         refreshTicks = 0;
         queue.clear();
         lastTrack = null;
+        inVenue = false;
         inWorld = false;
     }
 }

@@ -11,7 +11,7 @@ final class WaterSpellOwners {
 
     static LivingEntity resolve(ServerLevel level, UUID id) {
         if (id == null) return null;
-        LivingEntity caster = level.getServer().getPlayerList().getPlayer(id);
+        LivingEntity caster = com.tnc.tnc.dungeon.mirror.MirrorSpellHand.owner(level,id);
         if (caster == null && level.getEntity(id) instanceof LivingEntity living) caster = living;
         if (caster == null || !caster.isAlive() || caster.level() != level) return null;
         if (caster instanceof Player p && (p.isSpectator()

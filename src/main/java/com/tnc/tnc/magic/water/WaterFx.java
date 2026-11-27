@@ -311,6 +311,25 @@ public final class WaterFx {
 
     /** 水缚链持续表现：t1 收拢 / t2 落水 / t3 上浮 / t4 深渊墨花 / t5 冥穴 ✓。 */
     public static void bindFx(ServerLevel level, Vec3 center, double radius, double height, int tier, int age) {
+        if (tier == 4) {
+            if (age % 12 == 0) {
+                double angle = age * .096;
+                Vec3 lip = center.add(Math.cos(angle)*radius*.84, .26, Math.sin(angle)*radius*.84);
+                aimed(level, ParticleTypes.SPLASH, lip, new Vec3(-.035*Math.cos(angle), .14, -.035*Math.sin(angle)));
+            }
+            return;
+        }
+        if (WaterPrisonShape.usesArches(tier)) {
+            if (age % 8 != 0) return;
+            int count = WaterPrisonShape.bays(radius);
+            int bay = age / 8 % count;
+            double angle = (bay + .5) * Math.PI * 2 / count;
+            double flow = age * .075 - Math.PI * 1.5 + bay * 1.71;
+            double crest = WaterPrisonShape.height(height * WaterPrisonShape.rise(age), 1, flow);
+            var lip = center.add(Math.cos(angle) * radius, crest, Math.sin(angle) * radius);
+            aimed(level, ParticleTypes.FALLING_WATER, lip, new Vec3(0, -.12, 0));
+            return;
+        }
         if (age % 4 != 0) return;
         // 三道环：与客户端 y=.12+h*i/2 同一条公式 ✓。t1/t2 只是"绑住"⇒ 向内收 ✓；
         // t3 起服务端会真的把敌人往里拉 ✓ ⇒ 粒子也跟着向内 ✓，表现与机制同向 ✗。

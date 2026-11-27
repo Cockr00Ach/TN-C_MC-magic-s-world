@@ -72,7 +72,7 @@ public final class FreeMagicServer {
 
     static boolean canAct(ServerPlayer player) {return canRemain(player)&&!ElementalStates.silenced(player)&&!com.tnc.tnc.magic.water.ChaosSilence.silenced(player);}
     static boolean canRemain(ServerPlayer player) {
-        return player.isAlive() && !player.isSpectator() && !player.hasDisconnected()
+        return !com.tnc.tnc.dungeon.mirror.MirrorSilence.active(player) && player.isAlive() && !player.isSpectator() && !player.hasDisconnected()
                 && !DownedCombat.isDowned(player) && !DungeonService.recovering(player)
                 && !TortoiseStun.isStunned(player) && !player.hasEffect(ArcanaMealEffects.NO_MAGIC);
     }
@@ -323,11 +323,18 @@ public final class FreeMagicServer {
 
     @SubscribeEvent
     public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
-        UUID id = event.getEntity().getUUID();
+        if (event.getEntity() instanceof ServerPlayer p) interruptSpells(p);
+    }
+
+    public static void interruptSpells(ServerPlayer player) {
+        UUID id = player.getUUID();
         Session session = SESSIONS.remove(id);
         if (session != null) end(session, CLEAR);
         COOLDOWNS.remove(id);
         WaterAttackEngine.removeOwner(id);
+        ElementalRuntime.stop(player);
+        ElementalEffects.remove(id);
+        FireMagicEngine.remove(id);
     }
 
     @SubscribeEvent

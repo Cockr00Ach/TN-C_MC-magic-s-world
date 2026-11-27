@@ -245,6 +245,8 @@ public class TNFightingAngelEntity extends Monster implements GeoEntity {
      * 不是光系 Boss 阿波罗 ✓；<b>绝不打玩家（含主人）</b> ✗ —— 召唤物误伤主人是最糟的手感 ✗。
      */
     public boolean isValidLightTarget(LivingEntity target) {
+        var reflection=com.tnc.tnc.dungeon.mirror.MirrorSilence.summonOwner(this);
+        if(reflection!=null) return com.tnc.tnc.dungeon.mirror.MirrorSpells.enemy(reflection,target);
         if (!(target instanceof Monster)) {
             return false;
         }
@@ -336,7 +338,7 @@ public class TNFightingAngelEntity extends Monster implements GeoEntity {
         if (this.ownerId == null) {
             return;
         }
-        Player owner = level.getPlayerByUUID(this.ownerId);
+        Player owner = com.tnc.tnc.dungeon.mirror.MirrorSpellHand.player(level, this.ownerId);
         if (owner == null || !owner.isAlive() || owner.level() != this.level()) {
             this.discard();
             return;

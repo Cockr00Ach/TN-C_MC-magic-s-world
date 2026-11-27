@@ -698,7 +698,8 @@ public final class TnSpellMechanics {
      * @param data    玩家数据（回蓝要改它）
      */
     public static void onSpellCast(ServerPlayer player, ResourceLocation spellId, MagicStoneData data) {
-        if((com.tnc.tnc.combat.DownedCombat.isDowned(player)||com.tnc.tnc.dungeon.DungeonService.recovering(player)))return;
+        if (!(player instanceof com.tnc.tnc.dungeon.mirror.MirrorSpellHand) && (com.tnc.tnc.combat.DownedCombat.isDowned(player)
+                || com.tnc.tnc.dungeon.DungeonService.recovering(player) || com.tnc.tnc.dungeon.mirror.MirrorSilence.active(player))) return;
         String path = spellId.getPath();
 
         com.tnc.tnc.light.LightMirrorSpells.cast(player, path);
@@ -1184,8 +1185,16 @@ public final class TnSpellMechanics {
     /** 一个玩家一 tick 只处理一次的闸门：uuid -> 这一 tick 的 gameTime ✓ */
     private static final Map<UUID, Long> LAST_TICK_SEEN = new ConcurrentHashMap<>();
 
+    /** Attached game effects owned by a transient mirror stop with its magic phase. */
+    public static void clearMirror(UUID id) {
+        RECHARGE_UNTIL.remove(id); MARKS.remove(id); LAST_MARK.remove(id); BIG_BALL_UNTIL.remove(id);
+        DIVINE_UNTIL.remove(id); DIVINE_BOOST.remove(id); STORM_BOOST.remove(id); DIVINE_FIRED.remove(id);
+        GATHER.remove(id); FIELD_UNTIL.remove(id); STORM_UNTIL.remove(id); LAST_TICK_SEEN.remove(id); COILS.remove(id);
+    }
+
     /** 一个玩家一 tick 的全部持续行为（两个入口共用，幂等 ✓）。 */
-    private static void tickPlayer(ServerPlayer player) {
+    public static void tickPlayer(ServerPlayer player) {
+        if (com.tnc.tnc.dungeon.mirror.MirrorSilence.active(player)) return;
         if (player.level().isClientSide()) {
             return;
         }
@@ -2044,6 +2053,8 @@ public final class TnSpellMechanics {
      * 非玩家 owner **只打玩家** ✓ —— boss 之间 / 召唤物之间互相误伤不是我们要的观感 ✗。
      */
     public static boolean isEnemy(LivingEntity owner, LivingEntity target) {
+        if (com.tnc.tnc.dungeon.mirror.MirrorSpells.body(owner) != null)
+            return com.tnc.tnc.dungeon.mirror.MirrorSpells.enemy(owner, target);
         if (target == owner || !target.isAlive()) {
             return false;
         }

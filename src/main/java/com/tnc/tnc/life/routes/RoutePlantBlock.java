@@ -1,6 +1,8 @@
 package com.tnc.tnc.life.routes;
 import java.util.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.util.RandomSource;
 import net.minecraft.server.level.*;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,6 +20,24 @@ public final class RoutePlantBlock extends BushBlock implements EntityBlock {
     public static final IntegerProperty AGE=IntegerProperty.create("age",0,3);
     public static final BooleanProperty WILD=BooleanProperty.create("wild");
     public final NewPlantKind kind;
+
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+        if (state.getValue(AGE) != 3 || random.nextInt(4) != 0) return;
+        var particle = switch (kind) {
+            case STORM -> level.isThundering() && level.isRainingAt(pos.above())
+                    ? ParticleTypes.ELECTRIC_SPARK : null;
+            case DEW -> level.isRainingAt(pos.above()) ? ParticleTypes.FALLING_WATER : null;
+            case STEAM -> ParticleTypes.CLOUD;
+            case PRISM -> level.isDay() && level.canSeeSky(pos.above()) && !level.isRainingAt(pos.above())
+                    ? ParticleTypes.END_ROD : null;
+            default -> null;
+        };
+        if (particle == null) return;
+        double height = kind == NewPlantKind.STEAM ? .34 : .72;
+        level.addParticle(particle, pos.getX() + .4 + random.nextDouble() * .2, pos.getY() + height,
+                pos.getZ() + .4 + random.nextDouble() * .2, .004, .014, .002);
+    }
     public RoutePlantBlock(NewPlantKind kind){super(BlockBehaviour.Properties.copy(Blocks.FERN).offsetType(BlockBehaviour.OffsetType.NONE).noCollission().noOcclusion().lightLevel(s->s.getValue(AGE)==3?2:0));this.kind=kind;registerDefaultState(stateDefinition.any().setValue(AGE,0).setValue(WILD,false));}
     @Override public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext c){if(c.getLevel() instanceof net.minecraft.server.level.ServerLevel l&&!com.tnc.tnc.arcana.ArcanaRealms.powered(l,c.getClickedPos()))return null;return super.getStateForPlacement(c);}
     @Override public RenderShape getRenderShape(BlockState state){return RenderShape.ENTITYBLOCK_ANIMATED;}

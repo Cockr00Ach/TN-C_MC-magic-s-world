@@ -140,7 +140,7 @@ public final class TNLavaFieldEntity extends Entity {
         if (owner == null) {
             return null;
         }
-        ServerPlayer player = level.getServer().getPlayerList().getPlayer(owner);
+        ServerPlayer player = com.tnc.tnc.dungeon.mirror.MirrorSpellHand.owner(level,owner);
         if (player != null && player.level() == level) {
             return player;
         }

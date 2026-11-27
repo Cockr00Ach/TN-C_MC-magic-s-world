@@ -15,6 +15,30 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 @GameTestHolder("tncyan")
 @PrefixGameTestTemplate(false)
 public final class YanPrologueGameTests {
+    @GameTest(template = "empty", timeoutTicks = 100, batch = "yan_prologue")
+    public static void altarRewindsAStalledFight(GameTestHelper test) {
+        var level = test.getLevel().getServer().getLevel(YanPrologue.WORLD);
+        var player = FakePlayerFactory.get(level, new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "YanExitProbe"));
+        var scene = YanPrologue.reserveArena(player, level);
+        try {
+            var altar = YanSanctuaryLayout.ALTAR.offset(scene.entry.getX(),0,0);
+            level.getChunkAt(altar);
+            scene.phase = YanPrologue.Phase.COMBAT;
+            scene.boss = null;
+            player.setShiftKeyDown(true);
+            var hit = new net.minecraft.world.phys.BlockHitResult(Vec3.atCenterOf(altar), net.minecraft.core.Direction.UP, altar, false);
+            var event = new net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock(
+                    player, net.minecraft.world.InteractionHand.MAIN_HAND, altar, hit);
+            YanPrologue.useRewindAltar(event);
+            test.assertTrue(event.isCanceled() && scene.phase == YanPrologue.Phase.REWIND,
+                    "A player can start the normal rewind at their own altar even if their boss is missing");
+            test.succeed();
+        } finally {
+            player.setShiftKeyDown(false);
+            YanPrologue.abandon(scene);
+        }
+    }
+
     @GameTest(template = "empty", timeoutTicks = 120, batch = "yan_prologue")
     public static void storyArenaAndSecondLaneAreReady(GameTestHelper test) {
         var level = test.getLevel().getServer().getLevel(YanPrologue.WORLD);
@@ -33,6 +57,22 @@ public final class YanPrologueGameTests {
             var altar = YanSanctuaryLayout.ALTAR.offset(x, 0, 0);
             level.getChunkAt(altar);
             test.assertTrue(level.getBlockState(altar).is(YanSanctuary.ALTAR), "Each player sees the same altar");
+            var extension = new BlockPos(x + 30, YanOpeningAltar.FLOOR + 3, 0);
+            var preserved = extension.south();
+            level.getChunkAt(extension);
+            var originalExtension = level.getBlockState(extension);
+            var originalPreserved = level.getBlockState(preserved);
+            try {
+                level.setBlock(extension, YanSanctuaryLayout.platform(30, extension.getY(), 0), 2);
+                level.setBlock(preserved, net.minecraft.world.level.block.Blocks.AMETHYST_BLOCK.defaultBlockState(), 2);
+                YanOpeningAltar.upgradeChunk(level, new net.minecraft.world.level.ChunkPos(extension), x);
+                test.assertTrue(!level.getBlockState(extension).isAir(), "An old altar gets its extended floor");
+                test.assertTrue(level.getBlockState(preserved).is(net.minecraft.world.level.block.Blocks.AMETHYST_BLOCK),
+                        "Upgrading the old lane preserves custom blocks");
+            } finally {
+                level.setBlock(extension, originalExtension, 2);
+                level.setBlock(preserved, originalPreserved, 2);
+            }
         }
         test.succeed();
     }
@@ -61,6 +101,18 @@ public final class YanPrologueGameTests {
         YanPrologue.equip(player);
         YanPrologue.startCombat(scene);
         test.assertTrue(scene.boss.isAlive() && !scene.boss.execUsed(), "No execution in the first phase");
+        test.assertTrue(!com.tnc.tnc.sanctum.UnlitSanctum.enter(player) && player.level()==scene.arena,
+                "A final-room test cannot take the player out of an ongoing prologue combat");
+        var safe = scene.boss.position();
+        test.assertTrue(scene.boss.allowsBlinkLanding(safe) && !scene.boss.allowsBlinkLanding(safe.add(100, 0, 0))
+                && !scene.boss.allowsBlinkLanding(safe.add(0, 9, 0)), "Blink rejects points outside the stage or on pylons");
+        scene.boss.move(net.minecraft.world.entity.MoverType.SELF, new Vec3(90, 0, 0));
+        var center = new BlockPos(scene.entry.getX(), YanOpeningAltar.FEET, 0);
+        test.assertTrue(YanOpeningAltar.floorPoint(scene.boss.position(), center), "Knockback cannot push Yan off the top step");
+        scene.boss.teleportTo(safe.x + 95, safe.y + 12, safe.z);
+        scene.boss.keepOnStage();
+        test.assertTrue(scene.boss.position().distanceToSqr(safe) < .1 && scene.boss.getHealth() == 80,
+                "An external teleport returns the same live boss without resetting the fight");
 
         var hit = new net.minecraftforge.event.entity.living.LivingHurtEvent(player, player.damageSources().magic(), 40);
         YanPrologue.combatDamage(hit);

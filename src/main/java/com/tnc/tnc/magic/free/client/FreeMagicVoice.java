@@ -1,7 +1,11 @@
 package com.tnc.tnc.magic.free.client;
 
 import com.google.gson.JsonParser;
+import com.tnc.tnc.magic.free.ElementalIntent;
 import com.tnc.tnc.magic.free.FreeMagicIntent;
+import com.tnc.tnc.magic.MagicStone;
+import com.tnc.tnc.magic.MagicStoneData;
+import com.tnc.tnc.magic.free.EquippedSpellVoice;
 import net.minecraft.client.Minecraft;
 
 import javax.sound.sampled.AudioFormat;
@@ -31,6 +35,12 @@ public final class FreeMagicVoice {
         public Update(Kind kind, String text) {
             this(kind, text, "");
         }
+
+        public Update forLoadout(MagicStoneData data) {
+            if (kind != Kind.PARTIAL && kind != Kind.FINAL) return this;
+            String repaired = EquippedSpellVoice.repairName(text, data);
+            return repaired.equals(text) ? this : new Update(kind, repaired, shapeHint);
+        }
     }
 
     private static final String RUNTIME_PROPERTY = "tnc.freeMagicVoiceRuntime";
@@ -49,6 +59,18 @@ public final class FreeMagicVoice {
     private static Update terminal;
 
     private FreeMagicVoice() {}
+
+    // The spotter emits the canonical label even when it heard an alias. The client
+    // resolves a recognised label against the wand after reading the whole reply.
+    static String validHint(String hint) {
+        for (var shape : FreeMagicIntent.Shape.values()) {
+            if (shape.label.equals(hint)) return hint;
+        }
+        for (var ability : ElementalIntent.Ability.values()) {
+            if (ability.label.equals(hint)) return hint;
+        }
+        return "";
+    }
 
     public static synchronized boolean start() {
         if (active != null || terminal != null) return false;
@@ -94,7 +116,11 @@ public final class FreeMagicVoice {
         readyPending = false;
         partial = null;
         terminal = null;
-        return result;
+        if (result.isEmpty()) return result;
+        var player = Minecraft.getInstance().player;
+        if (player == null) return result;
+        var data = MagicStone.getOrNull(player);
+        return result.stream().map(update -> update.forLoadout(data)).toList();
     }
 
     private static synchronized void publishReady(Session session) {
@@ -327,13 +353,6 @@ public final class FreeMagicVoice {
             } catch (IOException | RuntimeException failed) {
                 pipeFailed = true;
             }
-        }
-
-        private static String validHint(String hint) {
-            for (var shape : FreeMagicIntent.Shape.values()) {
-                if (shape.label.equals(hint)) return hint;
-            }
-            return "";
         }
 
         private void stopEngine() {
