@@ -8,7 +8,10 @@ public final class MountMotion {
     static final double MAX_CONTIGUOUS_TRAVEL = 3;
     static final double MAX_CONTIGUOUS_TRAVEL_SQR = MAX_CONTIGUOUS_TRAVEL * MAX_CONTIGUOUS_TRAVEL;
     static final float NORMAL_FRICTION = .6f;
-    static final double SWIM_SPEED_FRACTION = .40;
+    static final double WOLF_MUZZLE_HEIGHT = 31.1 * .754 / 16;
+    static final float SWIM_WARNING_DISTANCE = 40f;
+    static final float SWIM_LIMIT = 48f;
+    static final float SWIM_RECOVERY_PER_TICK = SWIM_LIMIT / 100;
 
     static float steeredYaw(float yaw, float desired, float runProgress) {
         float limit = Mth.lerp(runProgress, 12f, 6f);
@@ -29,18 +32,40 @@ public final class MountMotion {
                 velocity.y, velocity.z * sideCarry + direction.z * (along - sideCarry * forward));
     }
 
-    static boolean swimming(double depth, boolean alreadySwimming) {
+    static boolean swimming(double depth, boolean alreadySwimming, boolean hasFooting) {
+        if (hasFooting) {
+            return depth >= .65;
+        }
         return depth >= (alreadySwimming ? .36 : .54);
     }
 
-    static Vec3 swimVelocity(Vec3 velocity, Vec3 intent, float riddenSpeed, double depth, boolean assistHorizontal) {
-        double rate = SWIM_SPEED_FRACTION * riddenSpeed / (1 - .91 * NORMAL_FRICTION);
-        Vec3 target = intent.scale(rate / Math.max(1, intent.length()));
-        double y = Mth.clamp((depth - .72) * .22, -.06, .105);
-        return new Vec3(
-                assistHorizontal ? Mth.lerp(.68, velocity.x, target.x) : velocity.x,
-                Mth.lerp(.58, velocity.y, y),
-                assistHorizontal ? Mth.lerp(.68, velocity.z, target.z) : velocity.z);
+    static double swimSpeedFactor(float used) {
+        if (used < 24) return .44;
+        if (used < 40) return Mth.lerp((used - 24) / 16, .44, .32);
+        if (used < 46) return Mth.lerp((used - 40) / 6, .32, .15);
+        return used < SWIM_LIMIT ? .15 : 0;
+    }
+
+    static float recordSwimDistance(float used, Vec3 movement, Vec3 current, Vec3 intent, double riddenSpeed) {
+        Vec3 forward = intent.normalize();
+        double progress = movement.subtract(current).dot(forward);
+        double cap = riddenSpeed * swimSpeedFactor(used) / (1 - .91 * NORMAL_FRICTION);
+        return Math.min(SWIM_LIMIT, used + (float) Mth.clamp(progress, 0, cap));
+    }
+
+    static Vec3 swimVelocity(Vec3 velocity, Vec3 intent, float riddenSpeed, double surfaceError,
+                             float used, boolean clear, boolean climbing, boolean entering) {
+        double speed = swimSpeedFactor(used) * riddenSpeed / (1 - .91 * NORMAL_FRICTION);
+        // At a reachable ledge the wolf can pull itself out even with its swim reserve spent.
+        if (climbing) speed = Math.max(speed, .14);
+        if (surfaceError > .34 && !climbing) speed = 0;
+        Vec3 target = intent.scale(speed / Math.max(1, intent.length()));
+        double y = Mth.clamp(surfaceError * .28 + .01, -.045, .12);
+        if (climbing) y = Math.max(.16, y);
+        else if (!clear) y = Math.max(.08, y);
+        double steering = entering ? .34 : .65;
+        return new Vec3(Mth.lerp(steering, velocity.x, target.x),
+                Mth.lerp(.58, velocity.y, y), Mth.lerp(steering, velocity.z, target.z));
     }
 
     enum Gait {
@@ -139,7 +164,7 @@ public final class MountMotion {
     }
 
     enum AirPose {
-        GROUND(""), TAKEOFF("takeoff"), RISE("rise"), FALL("fall"), LAND("land");
+        GROUND(""), TAKEOFF("takeoff"), RISE("rise"), FALL("fall"), LAND("land"), RUN_LAND("run_land");
 
         private static final AirPose[] WIRE_VALUES = values();
         final String clip;
@@ -158,7 +183,7 @@ public final class MountMotion {
         private int remainingTicks;
         private int unsupportedTicks;
 
-        AirPose update(boolean grounded, boolean immersed, double verticalTravel,
+        AirPose update(boolean grounded, boolean immersed, double verticalTravel, double horizontalTravel,
                        boolean riddenJump, boolean goat) {
             if (immersed) {
                 unsupportedTicks = remainingTicks = 0;
@@ -166,16 +191,17 @@ public final class MountMotion {
             }
             if (riddenJump) {
                 unsupportedTicks = 1;
-                remainingTicks = goat ? 4 : 3;
+                remainingTicks = goat ? 3 : 2;
                 return pose = AirPose.TAKEOFF;
             }
             if (grounded) {
                 unsupportedTicks = 0;
                 if (pose == AirPose.TAKEOFF || pose == AirPose.RISE || pose == AirPose.FALL) {
-                    remainingTicks = goat ? 7 : 6; // Includes the one-tick blend into landing.
-                    return pose = AirPose.LAND;
+                    boolean fast = horizontalTravel >= .24;
+                    remainingTicks = fast ? (goat ? 4 : 3) : (goat ? 6 : 5);
+                    return pose = fast ? AirPose.RUN_LAND : AirPose.LAND;
                 }
-                if (pose == AirPose.LAND && --remainingTicks > 0) {
+                if ((pose == AirPose.LAND || pose == AirPose.RUN_LAND) && --remainingTicks > 0) {
                     return pose;
                 }
                 return pose = AirPose.GROUND;
@@ -185,9 +211,10 @@ public final class MountMotion {
             if (pose == AirPose.TAKEOFF && --remainingTicks > 0 && verticalTravel >= -.04) {
                 return pose;
             }
-            if (unsupportedTicks == 1 && (pose == AirPose.GROUND || pose == AirPose.LAND)) {
+            if (unsupportedTicks == 1
+                    && (pose == AirPose.GROUND || pose == AirPose.LAND || pose == AirPose.RUN_LAND)) {
                 if (verticalTravel > .12) {
-                    remainingTicks = goat ? 4 : 3;
+                    remainingTicks = goat ? 3 : 2;
                     return pose = AirPose.TAKEOFF;
                 }
                 // A brief gap at a slab edge is not a jump.
@@ -195,11 +222,113 @@ public final class MountMotion {
                     return pose;
                 }
             }
-            return pose = verticalTravel > .02 ? AirPose.RISE : AirPose.FALL;
+            // Hold the approach to the apex and avoid alternating when packet displacements are near zero.
+            if (pose == AirPose.RISE && verticalTravel >= -.025) {
+                return pose;
+            }
+            return pose = verticalTravel > .045 ? AirPose.RISE : AirPose.FALL;
         }
 
         AirPose pose() {
             return pose;
+        }
+    }
+
+    static final class RunningJump {
+        private final Vec3[] steps = {Vec3.ZERO, Vec3.ZERO, Vec3.ZERO};
+        private int nextStep;
+        private Vec3 direction = Vec3.ZERO;
+        private Vec3 previousVelocity;
+        private int remaining;
+        private boolean launching;
+        private double target;
+        private double retention;
+
+        void recordGround(Vec3 displacement) {
+            if (displacement.horizontalDistanceSqr() < .0256) {
+                java.util.Arrays.fill(steps, Vec3.ZERO);
+                return;
+            }
+            steps[nextStep] = new Vec3(displacement.x, 0, displacement.z);
+            nextStep = (nextStep + 1) % steps.length;
+        }
+
+        boolean hasRunUp() {
+            return steps[(nextStep + 2) % steps.length].horizontalDistanceSqr() >= .0256;
+        }
+
+        void start(String species, float progress, Vec3 intent) {
+            stop();
+            Vec3 heading = steps[(nextStep + 2) % steps.length].normalize();
+            if (intent.normalize().dot(heading) < .70) {
+                return;
+            }
+            double a = steps[0].dot(heading);
+            double b = steps[1].dot(heading);
+            double c = steps[2].dot(heading);
+            double median = a + b + c - Math.min(a, Math.min(b, c)) - Math.max(a, Math.max(b, c));
+            if (median < .16 || median > MAX_CONTIGUOUS_TRAVEL) {
+                return;
+            }
+            direction = heading;
+            launching = true;
+            if (species.equals("rainbow_unicorn")) {
+                target = median * Mth.lerp(progress, .92, .98);
+                retention = Mth.lerp(progress, .965, .985);
+                remaining = 8 + Math.round(6 * progress);
+            } else if (species.equals("mountain_goat")) {
+                target = median * .93;
+                retention = .965;
+                remaining = 8;
+            } else {
+                target = median * .94;
+                retention = .970;
+                remaining = 9;
+            }
+        }
+
+        boolean active() {
+            return remaining > 0;
+        }
+
+        Vec3 beforeMove(Vec3 velocity, Vec3 vanillaInput) {
+            double deficit = target - velocity.add(vanillaInput).dot(direction);
+            // On the launch tick vanilla can add its jump impulse and ground input together.
+            // Limit their combined forward contribution without braking a pre-existing impulse.
+            if (deficit > 0 || (launching && velocity.dot(direction) <= target)) {
+                return velocity.add(direction.scale(deficit));
+            }
+            return velocity;
+        }
+
+        void afterMove(Vec3 displacement, boolean collision) {
+            launching = false;
+            double moved = displacement.dot(direction);
+            if (collision || moved < .07 || moved > MAX_CONTIGUOUS_TRAVEL) {
+                stop();
+            } else {
+                target = Math.min(target, moved) * retention;
+                remaining--;
+            }
+        }
+
+        boolean interruptedBy(Vec3 velocity) {
+            return previousVelocity != null && velocity.subtract(previousVelocity).lengthSqr() > .0025;
+        }
+
+        void rememberVelocity(Vec3 velocity) {
+            previousVelocity = active() ? velocity : null;
+        }
+
+        void stop() {
+            remaining = 0;
+            launching = false;
+            previousVelocity = null;
+        }
+
+        void reset() {
+            stop();
+            recordGround(Vec3.ZERO);
         }
     }
 

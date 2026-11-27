@@ -1,6 +1,8 @@
 package com.tnc.tnc.mount.client;
 
 import com.tnc.tnc.mount.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,6 +24,13 @@ public final class LandMountRenderer extends GeoEntityRenderer<LandMount>{
         @Override
         public void setCustomAnimations(LandMount mount, long instanceId, AnimationState<LandMount> state) {
             super.setCustomAnimations(mount, instanceId, state);
+            if (mount.onGround() && mount.getControllingPassenger() instanceof LocalPlayer rider
+                    && rider.zza > 0 && Minecraft.getInstance().options.keyJump.isDown()) {
+                var body = getAnimationProcessor().getBone("body");
+                if (body != null) {
+                    body.setPosY(body.getPosY() - .42f * rider.getJumpRidingScale());
+                }
+            }
             if (mount.species().equals("rainbow_unicorn")) {
                 float lean = mount.visualRunLean(state.getPartialTick());
                 setRunHairPitch("run_mane_lean", lean, 5);

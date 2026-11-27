@@ -37,16 +37,20 @@ final class LandMountAnimationController extends AnimationController<LandMount> 
         LandMount mount = state.getAnimatable();
         if (swim != null && mount.visualSwimming()) {
             transitionLength(2);
-            rate = Math.max(.55, Math.min(1.30, .55 + 1.7 * mount.visualSpeed()));
+            double ceiling = .55 + 1.7 * mount.swimSpeedFactor();
+            rate = Math.max(.55, Math.min(ceiling, .55 + 1.7 * mount.visualSpeed()));
             return state.setAndContinue(swim);
         }
         MountMotion.AirPose pose = mount.visualAirPose();
         if (pose != MountMotion.AirPose.GROUND) {
             transitionLength(1);
-            rate = 1;
+            rate = switch (pose) {
+                case TAKEOFF, LAND -> 1.5;
+                default -> 1;
+            };
             return state.setAndContinue(airborne.get(pose));
         }
-        transitionLength(2);
+        transitionLength(getCurrentRawAnimation() == airborne.get(MountMotion.AirPose.RUN_LAND) ? 1 : 2);
         MountMotion.Gait gait = mount.visualGait();
         rate = cadence.rate(gait, mount.visualSpeed());
         return state.setAndContinue(ground.get(gait));

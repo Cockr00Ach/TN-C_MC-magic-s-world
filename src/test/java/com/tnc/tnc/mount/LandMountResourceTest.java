@@ -68,15 +68,56 @@ class LandMountResourceTest {
 
  @Test void airborneStateHandlesJumpApexLandingAndQuickRejump() {
   var state = new MountMotion.AirMotion();
-  assertEquals(MountMotion.AirPose.GROUND, state.update(false, false, -.03, false, true));
-  assertEquals(MountMotion.AirPose.GROUND, state.update(true, false, 0, false, true));
-  assertEquals(MountMotion.AirPose.TAKEOFF, state.update(false, false, .4, true, true));
-  for (int i = 0; i < 4; i++) state.update(false, false, .24, false, true);
+  assertEquals(MountMotion.AirPose.GROUND, state.update(false, false, -.03, .1, false, true));
+  assertEquals(MountMotion.AirPose.GROUND, state.update(true, false, 0, .1, false, true));
+  assertEquals(MountMotion.AirPose.TAKEOFF, state.update(false, false, .4, .1, true, true));
+  for (int i = 0; i < 4; i++) state.update(false, false, .24, .1, false, true);
   assertEquals(MountMotion.AirPose.RISE, state.pose());
-  assertEquals(MountMotion.AirPose.FALL, state.update(false, false, -.08, false, true));
-  assertEquals(MountMotion.AirPose.LAND, state.update(true, false, -.01, false, true));
-  assertEquals(MountMotion.AirPose.TAKEOFF, state.update(false, false, .25, true, true));
-  assertEquals(MountMotion.AirPose.GROUND, state.update(false, true, -.1, false, true));
+  assertEquals(MountMotion.AirPose.FALL, state.update(false, false, -.08, .1, false, true));
+  assertEquals(MountMotion.AirPose.LAND, state.update(true, false, -.01, .1, false, true));
+  assertEquals(MountMotion.AirPose.TAKEOFF, state.update(false, false, .25, .1, true, true));
+  assertEquals(MountMotion.AirPose.GROUND, state.update(false, true, -.1, .1, false, true));
+ }
+
+ @Test void highSpeedJumpCarriesTheRunWithoutAddingAnotherTakeoffImpulse() {
+  var run = new MountMotion.RunningJump();
+  var forward = new net.minecraft.world.phys.Vec3(0, 0, 1);
+  for (double step : new double[] {1.74, 1.87, 1.89}) run.recordGround(forward.scale(step));
+  run.start("rainbow_unicorn", 1, forward);
+  assertTrue(run.active());
+  var current = new net.minecraft.world.phys.Vec3(.12, .65, 1.1);
+  var acceleration = forward.scale(.4);
+  var staged = run.beforeMove(current, acceleration);
+  assertEquals(1.87 * .98, staged.z + acceleration.z, 1e-6);
+  assertEquals(current.y, staged.y);
+  assertEquals(current.x, staged.x);
+  var originalGroundAndJumpInput = forward.scale(.85);
+  assertEquals(1.87 * .98,
+      run.beforeMove(current, originalGroundAndJumpInput).z + originalGroundAndJumpInput.z, 1e-6);
+  double displacement = staged.z + acceleration.z;
+  double distance = displacement;
+  for (int i = 1; i <= 10; i++) {
+   run.afterMove(forward.scale(displacement), false);
+   displacement = run.beforeMove(forward.scale(displacement * .91), net.minecraft.world.phys.Vec3.ZERO).z;
+   distance += displacement;
+  }
+  assertTrue(distance > 16);
+  run.afterMove(net.minecraft.world.phys.Vec3.ZERO, true);
+  assertFalse(run.active());
+  run.reset();
+  run.start("rainbow_unicorn", 1, forward);
+  assertFalse(run.active());
+ }
+
+ @Test void upperApexAndFastLandingAreContinuous() {
+  var air = new MountMotion.AirMotion();
+  assertEquals(MountMotion.AirPose.TAKEOFF, air.update(false, false, .6, 1.6, true, false));
+  air.update(false, false, .5, 1.6, false, false);
+  assertEquals(MountMotion.AirPose.RISE, air.update(false, false, .4, 1.6, false, false));
+  assertEquals(MountMotion.AirPose.RISE, air.update(false, false, -.01, 1.6, false, false));
+  assertEquals(MountMotion.AirPose.FALL, air.update(false, false, -.04, 1.6, false, false));
+  assertEquals(MountMotion.AirPose.RUN_LAND, air.update(true, false, -.02, 1.6, false, false));
+  assertEquals(MountMotion.AirPose.TAKEOFF, air.update(false, false, .55, 1.6, true, false));
  }
 
  @Test void aRateChangeDoesNotMoveAnAlreadyRenderedFrameBackwards() {
@@ -114,23 +155,27 @@ class LandMountResourceTest {
  }
 
  @Test void wolfSwimUsesDepthHysteresisAndBoundedBuoyancy() {
-  assertFalse(MountMotion.swimming(.45, false));
-  assertTrue(MountMotion.swimming(.56, false));
-  assertTrue(MountMotion.swimming(.45, true));
-  assertFalse(MountMotion.swimming(.30, true));
+  assertFalse(MountMotion.swimming(.45, false, false));
+  assertTrue(MountMotion.swimming(.56, false, false));
+  assertTrue(MountMotion.swimming(.45, true, false));
+  assertFalse(MountMotion.swimming(.30, true, false));
+  assertFalse(MountMotion.swimming(.60, true, true));
+  assertTrue(MountMotion.swimming(.70, false, true));
   var idle = net.minecraft.world.phys.Vec3.ZERO;
   var forward = new net.minecraft.world.phys.Vec3(0, 0, 1);
-  var velocity = MountMotion.swimVelocity(idle, forward, .51f, 1.5, true);
-  assertTrue(velocity.y > 0 && velocity.y <= .105);
-  assertTrue(velocity.z > 0);
-  double first = velocity.z;
+  var velocity = MountMotion.swimVelocity(idle, forward, .51f, .6, 0, true, false, true);
+  assertTrue(velocity.y > 0 && velocity.y <= .12);
+  assertEquals(0, velocity.z);
   for (int i = 0; i < 40; i++) {
-   velocity = MountMotion.swimVelocity(velocity.multiply(.8, .8, .8), forward, .51f, 1.0, true);
+   velocity = MountMotion.swimVelocity(velocity.multiply(.8, .8, .8), forward, .51f, 0, 0, true, false, false);
   }
   double landSpeed = .51 / (1 - .91 * .6);
-  assertTrue(velocity.z > first && velocity.z / landSpeed > .35 && velocity.z / landSpeed < .45);
-  assertTrue(MountMotion.swimVelocity(idle, idle, .51f, .375, true).y < 0);
-  assertEquals(velocity.z, MountMotion.swimVelocity(velocity, idle, .51f, .7, false).z, 1e-6);
+  assertTrue(velocity.z / landSpeed > .38 && velocity.z / landSpeed < .41);
+  assertEquals(0, MountMotion.swimVelocity(idle, forward, .51f, 0, 48, true, false, false).z, 1e-6);
+  assertTrue(MountMotion.swimVelocity(idle, forward, .51f, 0, 48, true, true, false).z > 0);
+  assertEquals(24f, MountMotion.recordSwimDistance(24, forward, forward, forward, .51));
+  assertEquals(24f, MountMotion.recordSwimDistance(24, forward, idle, idle, .51));
+  assertEquals(48f, MountMotion.recordSwimDistance(47.99f, forward, idle, forward, .51));
  }
 
  @Test void unicornExportsHoofbeatsAndIndependentHairPivots() throws Exception {
@@ -169,7 +214,7 @@ class LandMountResourceTest {
    Set<String> bones=new HashSet<>();for(var bone:geo.getAsJsonArray("bones"))assertTrue(bones.add(bone.getAsJsonObject().get("name").getAsString()));
    assertFalse(bones.contains("saddle"),"Bareback mounts must not ship saddle geometry");
    var clips=JsonParser.parseString(Files.readString(root.resolve("animations/mount/"+id+".animation.json"))).getAsJsonObject().getAsJsonObject("animations");
-   var modes = new ArrayList<>(List.of("idle","walk","trot","gallop","takeoff","rise","fall","land"));
+   var modes = new ArrayList<>(List.of("idle","walk","trot","gallop","takeoff","rise","fall","land","run_land"));
    if (id.equals("snow_wolf")) modes.add("swim");
    for(String mode:modes){
     var clip=clips.getAsJsonObject("animation."+id+"."+mode);assertNotNull(clip);
