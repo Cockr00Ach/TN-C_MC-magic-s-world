@@ -9,9 +9,11 @@ public final class MountMotion {
     static final double MAX_CONTIGUOUS_TRAVEL_SQR = MAX_CONTIGUOUS_TRAVEL * MAX_CONTIGUOUS_TRAVEL;
     static final float NORMAL_FRICTION = .6f;
     static final double WOLF_MUZZLE_HEIGHT = 31.1 * .754 / 16;
-    static final float SWIM_WARNING_DISTANCE = 40f;
-    static final float SWIM_LIMIT = 48f;
-    static final float SWIM_RECOVERY_PER_TICK = SWIM_LIMIT / 100;
+    public static final int SWIM_CAPACITY = 360;
+    public static final int SWIM_SLOW_THRESHOLD = 126;
+    public static final int SWIM_WARNING_THRESHOLD = 54;
+    static final int SWIM_RECOVERY_DELAY = 10;
+    static final int SWIM_RECOVERY_PER_TICK = 2;
 
     static float steeredYaw(float yaw, float desired, float runProgress) {
         float limit = Mth.lerp(runProgress, 12f, 6f);
@@ -39,23 +41,29 @@ public final class MountMotion {
         return depth >= (alreadySwimming ? .36 : .54);
     }
 
-    static double swimSpeedFactor(float used) {
-        if (used < 24) return .44;
-        if (used < 40) return Mth.lerp((used - 24) / 16, .44, .32);
-        if (used < 46) return Mth.lerp((used - 40) / 6, .32, .15);
-        return used < SWIM_LIMIT ? .15 : 0;
+    static double swimSpeedFactor(int stamina) {
+        if (stamina >= SWIM_SLOW_THRESHOLD) return .44;
+        if (stamina >= SWIM_WARNING_THRESHOLD) {
+            return .44 * Mth.lerp((stamina - SWIM_WARNING_THRESHOLD)
+                    / (double) (SWIM_SLOW_THRESHOLD - SWIM_WARNING_THRESHOLD), .75, 1);
+        }
+        return stamina > 0 ? .44 * Mth.lerp(stamina / (double) SWIM_WARNING_THRESHOLD, .45, .75) : 0;
     }
 
-    static float recordSwimDistance(float used, Vec3 movement, Vec3 current, Vec3 intent, double riddenSpeed) {
-        Vec3 forward = intent.normalize();
-        double progress = movement.subtract(current).dot(forward);
-        double cap = riddenSpeed * swimSpeedFactor(used) / (1 - .91 * NORMAL_FRICTION);
-        return Math.min(SWIM_LIMIT, used + (float) Mth.clamp(progress, 0, cap));
+    static boolean activelyPaddling(Vec3 movement, Vec3 current, Vec3 intent) {
+        Vec3 direction = intent.normalize();
+        double forwardTravel = movement.dot(direction);
+        return forwardTravel > .012 && forwardTravel - current.dot(direction) > .012;
+    }
+
+    static int migrateSwimDistance(float usedDistance) {
+        return Float.isFinite(usedDistance) ? Math.round(SWIM_CAPACITY * (1 - Mth.clamp(usedDistance / 48, 0, 1)))
+                : SWIM_CAPACITY;
     }
 
     static Vec3 swimVelocity(Vec3 velocity, Vec3 intent, float riddenSpeed, double surfaceError,
-                             float used, boolean clear, boolean climbing, boolean entering) {
-        double speed = swimSpeedFactor(used) * riddenSpeed / (1 - .91 * NORMAL_FRICTION);
+                             int stamina, boolean clear, boolean climbing, boolean entering) {
+        double speed = swimSpeedFactor(stamina) * riddenSpeed / (1 - .91 * NORMAL_FRICTION);
         // At a reachable ledge the wolf can pull itself out even with its swim reserve spent.
         if (climbing) speed = Math.max(speed, .14);
         if (surfaceError > .34 && !climbing) speed = 0;

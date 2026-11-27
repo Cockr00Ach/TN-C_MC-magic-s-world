@@ -13,6 +13,8 @@ final class LandMountAnimationController extends AnimationController<LandMount> 
     private final MountMotion.PlaybackClock clock = new MountMotion.PlaybackClock();
     private final MountMotion.Cadence cadence;
     private final RawAnimation swim;
+    private final RawAnimation treadWater;
+    private final RawAnimation climbBank;
     private double rate = 1;
 
     LandMountAnimationController(LandMount mount) {
@@ -20,6 +22,8 @@ final class LandMountAnimationController extends AnimationController<LandMount> 
         String prefix = "animation." + mount.species() + ".";
         cadence = MountMotion.Cadence.forSpecies(mount.species());
         swim = mount.snow() ? RawAnimation.begin().thenLoop(prefix + "swim") : null;
+        treadWater = mount.snow() ? RawAnimation.begin().thenLoop(prefix + "tread_water") : null;
+        climbBank = mount.snow() ? RawAnimation.begin().thenPlayAndHold(prefix + "swim_climb") : null;
         if (mount.species().equals("rainbow_unicorn")) {
             setSoundKeyframeHandler(event -> mount.playAnimatedHoofbeat());
         }
@@ -36,10 +40,17 @@ final class LandMountAnimationController extends AnimationController<LandMount> 
     private PlayState select(AnimationState<LandMount> state) {
         LandMount mount = state.getAnimatable();
         if (swim != null && mount.visualSwimming()) {
-            transitionLength(2);
-            double ceiling = .55 + 1.7 * mount.swimSpeedFactor();
-            rate = Math.max(.55, Math.min(ceiling, .55 + 1.7 * mount.visualSpeed()));
-            return state.setAndContinue(swim);
+            transitionLength(mount.visualClimbingBank() ? 2 : 4);
+            if (mount.visualClimbingBank()) {
+                rate = 1;
+                return state.setAndContinue(climbBank);
+            }
+            if (mount.visualPaddling()) {
+                rate = Math.max(.75, Math.min(1.15, .72 + mount.visualSpeed()));
+                return state.setAndContinue(swim);
+            }
+            rate = 1;
+            return state.setAndContinue(treadWater);
         }
         MountMotion.AirPose pose = mount.visualAirPose();
         if (pose != MountMotion.AirPose.GROUND) {

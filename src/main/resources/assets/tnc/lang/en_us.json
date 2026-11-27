@@ -1,5 +1,7 @@
 {
-  "message.tnc.snow_wolf.tired": "Your snow wolf is tiring. Head for shore.",
+  "message.tnc.snow_wolf.tired": "Your snow wolf is nearly exhausted. Head for shore.",
+  "hud.tnc.snow_wolf.swim_stamina": "Swim stamina %s%%",
+  "hud.tnc.snow_wolf.swim_exhausted": "Swim stamina depleted",
   "entity.tnc.longsword_champion": "Qingxiao, Sword Keeper",
   "entity.tnc.greatsword_champion": "Chique, Gate of the Greatblade",
   "entity.tnc.hammer_champion": "Mingzhu, Thunder Anvil",

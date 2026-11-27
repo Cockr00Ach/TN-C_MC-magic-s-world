@@ -1,5 +1,7 @@
 {
-  "message.tnc.snow_wolf.tired": "雪狼开始疲惫，尽快靠岸",
+  "message.tnc.snow_wolf.tired": "雪狼快游不动了，靠岸休息",
+  "hud.tnc.snow_wolf.swim_stamina": "游泳耐力 %s%%",
+  "hud.tnc.snow_wolf.swim_exhausted": "游泳力竭",
   "entity.tnc.longsword_champion": "青霄 · 守剑人",
   "entity.tnc.greatsword_champion": "赤阙 · 镇关重剑",
   "entity.tnc.hammer_champion": "鸣铸 · 雷砧",

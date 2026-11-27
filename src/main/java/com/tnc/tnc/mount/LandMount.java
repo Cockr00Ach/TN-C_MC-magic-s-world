@@ -14,6 +14,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -39,8 +40,12 @@ public final class LandMount extends Horse implements GeoEntity {
             SynchedEntityData.defineId(LandMount.class, EntityDataSerializers.BYTE);
     private static final EntityDataAccessor<Boolean> SWIMMING =
             SynchedEntityData.defineId(LandMount.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Float> SWIM_DISTANCE =
-            SynchedEntityData.defineId(LandMount.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Integer> SWIM_STAMINA =
+            SynchedEntityData.defineId(LandMount.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> SWIM_PADDLING =
+            SynchedEntityData.defineId(LandMount.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> SWIM_CLIMBING =
+            SynchedEntityData.defineId(LandMount.class, EntityDataSerializers.BOOLEAN);
     private static final int RUN_SYNC_INTERVAL = 3;
     private final AnimatableInstanceCache animationCache=GeckoLibUtil.createInstanceCache(this);
     // Server state and local rider prediction use the same tick rule.
@@ -55,6 +60,7 @@ public final class LandMount extends Horse implements GeoEntity {
     private boolean swimming;
     private boolean tiredWarningSent;
     private int swimEntryTicks;
+    private int paddleHoldTicks;
     private int drySwimRecoveryTicks;
     private Vec3 lastSnowVelocity;
     private int unassistedUntilTick;
@@ -73,7 +79,9 @@ public final class LandMount extends Horse implements GeoEntity {
         entityData.define(UNICORN_RUN_TICKS, 0);
         entityData.define(AIR_POSE, (byte) MountMotion.AirPose.GROUND.ordinal());
         entityData.define(SWIMMING, false);
-        entityData.define(SWIM_DISTANCE, 0f);
+        entityData.define(SWIM_STAMINA, MountMotion.SWIM_CAPACITY);
+        entityData.define(SWIM_PADDLING, false);
+        entityData.define(SWIM_CLIMBING, false);
     }
 
     @Override
@@ -148,8 +156,8 @@ public final class LandMount extends Horse implements GeoEntity {
             if (!level().isClientSide) {
                 entityData.set(AIR_POSE, (byte) pose.ordinal());
                 entityData.set(SWIMMING, swimming);
-                if (snow() && !teleported) {
-                    updateSwimDistance(startedSwimming && swimming, displacement);
+                if (snow()) {
+                    updateSwimStamina(startedSwimming && swimming, teleported, displacement);
                 }
             }
         }
@@ -282,9 +290,12 @@ public final class LandMount extends Horse implements GeoEntity {
         lastSnowVelocity = null;
         unassistedUntilTick = 0;
         swimming = false;
+        paddleHoldTicks = 0;
         if (!level().isClientSide) {
             entityData.set(UNICORN_RUN_TICKS, 0);
             entityData.set(SWIMMING, false);
+            entityData.set(SWIM_PADDLING, false);
+            entityData.set(SWIM_CLIMBING, false);
         }
     }
 
@@ -302,46 +313,64 @@ public final class LandMount extends Horse implements GeoEntity {
                 && MountMotion.swimming(getFluidHeight(FluidTags.WATER), swimming, onGround());
     }
 
-    double swimSpeedFactor() {
-        return MountMotion.swimSpeedFactor(entityData.get(SWIM_DISTANCE));
+    public int swimStamina() {
+        return entityData.get(SWIM_STAMINA);
     }
 
-    private void updateSwimDistance(boolean paddling, Vec3 displacement) {
-        float before = entityData.get(SWIM_DISTANCE);
-        float distance = before;
-        if (paddling || !onGround() || isInWater() || isInLava()) {
-            drySwimRecoveryTicks = 0;
-        }
-        if (paddling && getControllingPassenger() instanceof Player rider) {
+    public boolean isSurfaceSwimming() {
+        return visualSwimming();
+    }
+
+    boolean visualPaddling() {
+        return entityData.get(SWIM_PADDLING);
+    }
+
+    boolean visualClimbingBank() {
+        return entityData.get(SWIM_CLIMBING);
+    }
+
+    private void updateSwimStamina(boolean inDeepWater, boolean teleported, Vec3 displacement) {
+        int stamina = swimStamina();
+        boolean paddled = false;
+        boolean climbing = false;
+        if (inDeepWater && getControllingPassenger() instanceof Player rider) {
             Vec3 intent = worldIntent(new Vec3(rider.xxa * .5f, 0, rider.zza > 0 ? rider.zza : rider.zza * .25f));
             BlockPos cell = blockPosition();
             var fluid = level().getFluidState(cell);
             Vec3 current = fluid.is(FluidTags.WATER) ? fluid.getFlow(level(), cell).scale(.014) : Vec3.ZERO;
-            double speed = getRiddenSpeed(rider);
-            distance = MountMotion.recordSwimDistance(before, displacement, current, intent, speed);
-            if (!tiredWarningSent && distance >= MountMotion.SWIM_WARNING_DISTANCE) {
-                tiredWarningSent = true;
-                rider.displayClientMessage(Component.translatable("message.tnc.snow_wolf.tired"), true);
-                playSound(SoundEvents.WOLF_PANT, .65f, .88f);
-            }
-        } else if (before > 0 && onGround() && !isInWater() && !isInLava()) {
-            if (++drySwimRecoveryTicks >= 4) {
-                distance = Math.max(0, before - MountMotion.SWIM_RECOVERY_PER_TICK);
-                if (distance < MountMotion.SWIM_WARNING_DISTANCE - 2) {
-                    tiredWarningSent = false;
+            climbing = canClimbBank(intent);
+            if (stamina > 0 && MountMotion.activelyPaddling(displacement, current, intent)) {
+                paddled = true;
+                --stamina;
+                if (!tiredWarningSent && stamina <= MountMotion.SWIM_WARNING_THRESHOLD) {
+                    tiredWarningSent = true;
+                    rider.displayClientMessage(Component.translatable("message.tnc.snow_wolf.tired"), true);
+                    playSound(SoundEvents.WOLF_PANT, .65f, .88f);
                 }
             }
         }
-        if (distance != before) {
-            entityData.set(SWIM_DISTANCE, distance);
+        if (teleported || !onGround() || isInWater() || isInLava()) {
+            drySwimRecoveryTicks = 0;
+        } else if (stamina < MountMotion.SWIM_CAPACITY) {
+            drySwimRecoveryTicks = Math.min(drySwimRecoveryTicks + 1, MountMotion.SWIM_RECOVERY_DELAY);
+            if (drySwimRecoveryTicks == MountMotion.SWIM_RECOVERY_DELAY) {
+                stamina = Math.min(MountMotion.SWIM_CAPACITY, stamina + MountMotion.SWIM_RECOVERY_PER_TICK);
+                if (stamina > MountMotion.SWIM_SLOW_THRESHOLD) tiredWarningSent = false;
+            }
         }
+        if (paddled) paddleHoldTicks = 3;
+        else paddleHoldTicks = Math.max(paddleHoldTicks - 1, 0);
+        entityData.set(SWIM_STAMINA, stamina);
+        entityData.set(SWIM_PADDLING, inDeepWater && stamina > 0 && paddleHoldTicks > 0);
+        entityData.set(SWIM_CLIMBING, climbing);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         if (snow()) {
-            tag.putFloat("TncSwimDistance", entityData.get(SWIM_DISTANCE));
+            tag.putInt("TncSwimStamina", swimStamina());
+            tag.putBoolean("TncSwimWarningSent", tiredWarningSent);
         }
     }
 
@@ -349,10 +378,12 @@ public final class LandMount extends Horse implements GeoEntity {
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
         if (snow()) {
-            float saved = tag.getFloat("TncSwimDistance");
-            float distance = Float.isFinite(saved) ? Mth.clamp(saved, 0, MountMotion.SWIM_LIMIT) : 0;
-            entityData.set(SWIM_DISTANCE, distance);
-            tiredWarningSent = distance >= MountMotion.SWIM_WARNING_DISTANCE;
+            int stamina = tag.contains("TncSwimStamina", Tag.TAG_INT)
+                    ? Mth.clamp(tag.getInt("TncSwimStamina"), 0, MountMotion.SWIM_CAPACITY)
+                    : MountMotion.migrateSwimDistance(tag.getFloat("TncSwimDistance"));
+            entityData.set(SWIM_STAMINA, stamina);
+            tiredWarningSent = tag.contains("TncSwimWarningSent")
+                    ? tag.getBoolean("TncSwimWarningSent") : stamina <= MountMotion.SWIM_WARNING_THRESHOLD;
         }
     }
 
@@ -433,7 +464,7 @@ public final class LandMount extends Horse implements GeoEntity {
             error = .65;
         }
         Vec3 controlled = MountMotion.swimVelocity(velocity, intent, getSpeed(), error,
-                entityData.get(SWIM_DISTANCE), clear, climbing, swimEntryTicks < 5);
+                swimStamina(), clear, climbing, swimEntryTicks < 5);
         Vec3 next = new Vec3(controlled.x, 0, controlled.z);
         if (!climbing && !hasBreathingSpace(next, surface)) {
             Vec3 x = new Vec3(next.x, 0, 0);

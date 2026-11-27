@@ -163,19 +163,30 @@ class LandMountResourceTest {
   assertTrue(MountMotion.swimming(.70, false, true));
   var idle = net.minecraft.world.phys.Vec3.ZERO;
   var forward = new net.minecraft.world.phys.Vec3(0, 0, 1);
-  var velocity = MountMotion.swimVelocity(idle, forward, .51f, .6, 0, true, false, true);
+  var velocity = MountMotion.swimVelocity(idle, forward, .51f, .6, MountMotion.SWIM_CAPACITY, true, false, true);
   assertTrue(velocity.y > 0 && velocity.y <= .12);
   assertEquals(0, velocity.z);
   for (int i = 0; i < 40; i++) {
-   velocity = MountMotion.swimVelocity(velocity.multiply(.8, .8, .8), forward, .51f, 0, 0, true, false, false);
+   velocity = MountMotion.swimVelocity(velocity.multiply(.8, .8, .8), forward, .51f, 0, MountMotion.SWIM_CAPACITY, true, false, false);
   }
   double landSpeed = .51 / (1 - .91 * .6);
   assertTrue(velocity.z / landSpeed > .38 && velocity.z / landSpeed < .41);
-  assertEquals(0, MountMotion.swimVelocity(idle, forward, .51f, 0, 48, true, false, false).z, 1e-6);
-  assertTrue(MountMotion.swimVelocity(idle, forward, .51f, 0, 48, true, true, false).z > 0);
-  assertEquals(24f, MountMotion.recordSwimDistance(24, forward, forward, forward, .51));
-  assertEquals(24f, MountMotion.recordSwimDistance(24, forward, idle, idle, .51));
-  assertEquals(48f, MountMotion.recordSwimDistance(47.99f, forward, idle, forward, .51));
+  assertEquals(0, MountMotion.swimVelocity(idle, forward, .51f, 0, 0, true, false, false).z, 1e-6);
+  assertTrue(MountMotion.swimVelocity(idle, forward, .51f, 0, 0, true, true, false).z > 0);
+  assertFalse(MountMotion.activelyPaddling(forward, forward, forward));
+  assertFalse(MountMotion.activelyPaddling(forward, idle, idle));
+  assertFalse(MountMotion.activelyPaddling(idle, idle, forward));
+  assertFalse(MountMotion.activelyPaddling(idle, forward.scale(-.014), forward));
+  assertTrue(MountMotion.activelyPaddling(forward, idle, forward));
+  assertTrue(MountMotion.activelyPaddling(forward.reverse(), idle, forward.reverse()));
+  assertEquals(180, MountMotion.migrateSwimDistance(24));
+  assertEquals(360, MountMotion.migrateSwimDistance(0));
+  assertEquals(0, MountMotion.migrateSwimDistance(48));
+  assertEquals(360, MountMotion.migrateSwimDistance(Float.NaN));
+  assertEquals(.44, MountMotion.swimSpeedFactor(MountMotion.SWIM_CAPACITY));
+  assertEquals(.44, MountMotion.swimSpeedFactor(MountMotion.SWIM_SLOW_THRESHOLD));
+  assertEquals(.33, MountMotion.swimSpeedFactor(MountMotion.SWIM_WARNING_THRESHOLD), 1e-6);
+  assertEquals(0, MountMotion.swimSpeedFactor(0));
  }
 
  @Test void unicornExportsHoofbeatsAndIndependentHairPivots() throws Exception {
@@ -215,10 +226,10 @@ class LandMountResourceTest {
    assertFalse(bones.contains("saddle"),"Bareback mounts must not ship saddle geometry");
    var clips=JsonParser.parseString(Files.readString(root.resolve("animations/mount/"+id+".animation.json"))).getAsJsonObject().getAsJsonObject("animations");
    var modes = new ArrayList<>(List.of("idle","walk","trot","gallop","takeoff","rise","fall","land","run_land"));
-   if (id.equals("snow_wolf")) modes.add("swim");
+   if (id.equals("snow_wolf")) modes.addAll(List.of("swim", "tread_water", "swim_climb"));
    for(String mode:modes){
     var clip=clips.getAsJsonObject("animation."+id+"."+mode);assertNotNull(clip);
-    boolean cyclic = List.of("idle","walk","trot","gallop","swim").contains(mode);
+    boolean cyclic = List.of("idle","walk","trot","gallop","swim","tread_water").contains(mode);
     if(cyclic) assertTrue(clip.get("loop").getAsBoolean());
     else assertEquals("hold_on_last_frame", clip.get("loop").getAsString());
     double length=clip.get("animation_length").getAsDouble();assertTrue(length>0);
