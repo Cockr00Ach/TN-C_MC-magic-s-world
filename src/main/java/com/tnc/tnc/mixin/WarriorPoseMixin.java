@@ -1,11 +1,14 @@
 package com.tnc.tnc.mixin;
 
+import com.tnc.tnc.mount.LandMount;
 import com.tnc.tnc.warrior.client.WarriorPose;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -33,11 +36,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PlayerModel.class)
 public abstract class WarriorPoseMixin {
 
+    @Unique private boolean tnc$mountedLegPivots;
+
+    @Inject(method = "setupAnim", at = @At("HEAD"))
+    private void tnc$restoreMountedLegs(LivingEntity entity, float limbSwing, float limbSwingAmount,
+                                        float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo callback) {
+        if (tnc$mountedLegPivots) {
+            HumanoidModel<?> model = (HumanoidModel<?>) (Object) this;
+            tnc$restoreLegPivot(model.leftLeg);
+            tnc$restoreLegPivot(model.rightLeg);
+            tnc$mountedLegPivots = false;
+        }
+    }
+
+    @Unique
+    private static void tnc$restoreLegPivot(ModelPart leg) {
+        var initial = leg.getInitialPose();
+        leg.setPos(initial.x, initial.y, initial.z);
+    }
+
     @Inject(method = "setupAnim", at = @At("TAIL"))
     private void tnc$warriorPose(LivingEntity entity, float limbSwing, float limbSwingAmount,
                                  float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo callback) {
         if (entity instanceof Player player) {
             WarriorPose.apply(player, (HumanoidModel<?>) (Object) this);
+            tnc$mountedLegPivots = player.getVehicle() instanceof LandMount;
         }
     }
 }

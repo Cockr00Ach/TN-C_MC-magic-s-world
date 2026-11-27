@@ -1,4 +1,7 @@
 {
+  "message.tnc.snow_wolf.tired": "雪狼快游不动了，靠岸休息",
+  "hud.tnc.snow_wolf.swim_stamina": "游泳耐力 %s%%",
+  "hud.tnc.snow_wolf.swim_exhausted": "游泳力竭",
   "entity.tnc.echo_core": "虚镜魔核",
   "entity.tnc.echo_double": "镜像",
   "entity.tnc.echo_rod_hook": "镜像鱼钩",

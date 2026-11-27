@@ -64,6 +64,9 @@ class WarriorPlayerLayerPoseTest {
                         @Override public void visitMethodInsn(int opcode,String owner,String name,String desc,boolean itf) {
                             if(owner.equals("net/minecraft/world/entity/player/Player")&&name.equals("getId")) {
                                 super.visitInsn(Opcodes.POP);super.visitInsn(Opcodes.ICONST_0);
+                            } else if(owner.equals("net/minecraft/world/entity/player/Player")&&name.equals("getVehicle")) {
+                                // These skin-layer fixtures render the player on foot.
+                                super.visitInsn(Opcodes.POP);super.visitInsn(Opcodes.ACONST_NULL);
                             } else if(owner.equals("com/tnc/tnc/warrior/client/WarriorAnimationClient")&&name.equals("active")) {
                                 super.visitInsn(Opcodes.POP);super.visitInsn(Opcodes.ACONST_NULL);
                             } else if(owner.equals("com/tnc/tnc/bronze/BronzeTwinWeapon")&&name.equals("active")) {
@@ -77,7 +80,7 @@ class WarriorPlayerLayerPoseTest {
                 }
             },0);
         }
-        assertTrue(fixtures[0]>=4,"Equipment fixtures must reach the production idle-pair path");
+        assertTrue(fixtures[0]>=5,"Equipment fixtures must reach the production idle-pair path");
         byte[] bytes=writer.toByteArray();
         Class<?> replay=new ClassLoader(WarriorPose.class.getClassLoader()) {
             Class<?> replay(){return defineClass(WarriorPose.class.getName(),bytes,0,bytes.length);}

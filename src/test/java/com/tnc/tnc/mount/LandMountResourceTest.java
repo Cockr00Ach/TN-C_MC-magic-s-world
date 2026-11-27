@@ -18,10 +18,206 @@ class LandMountResourceTest {
   assertEquals(1.5f, MountMotion.unicornSpeedMultiplier(MountMotion.advanceUnicornRun(ticks, false, false)));
  }
 
- @Test void animationThresholdsAndRateAreBounded(){
-  assertEquals("idle",MountMotion.clip(0));assertEquals("walk",MountMotion.clip(.05));assertEquals("trot",MountMotion.clip(.15));assertEquals("gallop",MountMotion.clip(.3));
-  assertTrue(MountMotion.rate("gallop",.4)>MountMotion.rate("gallop",.25));assertTrue(MountMotion.rate("gallop",50)<=1.65);
+ @Test void predictionReconcilesWithoutReusingProgressAfterStop() {
+  assertEquals(0, MountMotion.reconcileUnicornRun(0, 54));
+  assertEquals(0, MountMotion.reconcileUnicornRun(54, 0));
+  assertEquals(35, MountMotion.reconcileUnicornRun(35, 30));
+  assertEquals(45, MountMotion.reconcileUnicornRun(48, 33));
+  assertEquals(28, MountMotion.reconcileUnicornRun(25, 36));
  }
+
+ @Test void runtimeSeatAnchorMatchesTheRidingProfile() throws Exception {
+  double modelUnit = (0.65f * LandMounts.SIZE_MULTIPLIER) / 16.0;
+  for (String id : List.of("rainbow_unicorn", "mountain_goat", "snow_wolf")) {
+   var geometry = JsonParser.parseString(Files.readString(Path.of("src/main/resources/assets/tnc/geo/mount/" + id + ".geo.json")))
+     .getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+   var marker = geometry.getAsJsonArray("bones").asList().stream().map(JsonElement::getAsJsonObject)
+     .filter(bone -> bone.get("name").getAsString().equals("rider_seat")).findFirst().orElseThrow();
+   assertEquals("body", marker.get("parent").getAsString());
+   assertFalse(marker.has("cubes"), "The rider seat must be invisible");
+   var pivot = marker.getAsJsonArray("pivot");
+   var pose = MountRiderPose.forSpecies(id);
+   assertEquals(pivot.get(1).getAsDouble() * modelUnit, pose.ridingOffset() + .35, 0.00001);
+   assertEquals(pivot.get(2).getAsDouble() * modelUnit, pose.rearOffset(), 0.00001);
+  }
+ }
+
+ @Test void measuredCadenceTracksSpeedAndCapsTheFastestCycle() {
+  for (String id : List.of("rainbow_unicorn", "mountain_goat", "snow_wolf")) {
+   var timing = MountMotion.Cadence.forSpecies(id).gallop();
+   double speed = timing.distancePerCycle() / timing.clipTicks();
+   assertEquals(1.0, timing.rate(speed), 1e-6);
+   assertTrue(timing.rate(speed / 2) < timing.rate(speed));
+   assertEquals(id.equals("rainbow_unicorn") ? 7 : 6, timing.clipTicks() / timing.rate(.9), 1e-6);
+  }
+ }
+
+ @Test void gaitDoesNotFlipOnAnIsolatedSpeedSpikeAndStopsAfterTeleport() {
+  var cadence = MountMotion.Cadence.forSpecies("mountain_goat");
+  var motion = new MountMotion.GroundMotion();
+  for (int i = 0; i < 12; i++) motion.update(.025, cadence);
+  assertEquals(MountMotion.Gait.WALK, motion.gait());
+  motion.update(.22, cadence);
+  for (int i = 0; i < 8; i++) motion.update(.025, cadence);
+  assertEquals(MountMotion.Gait.WALK, motion.gait());
+  for (int i = 0; i < 12; i++) motion.update(.4, cadence);
+  assertEquals(MountMotion.Gait.GALLOP, motion.gait());
+  motion.update(12, cadence);
+  assertEquals(MountMotion.Gait.IDLE, motion.gait());
+ }
+
+ @Test void airborneStateHandlesJumpApexLandingAndQuickRejump() {
+  var state = new MountMotion.AirMotion();
+  assertEquals(MountMotion.AirPose.GROUND, state.update(false, false, -.03, .1, false, true));
+  assertEquals(MountMotion.AirPose.GROUND, state.update(true, false, 0, .1, false, true));
+  assertEquals(MountMotion.AirPose.TAKEOFF, state.update(false, false, .4, .1, true, true));
+  for (int i = 0; i < 4; i++) state.update(false, false, .24, .1, false, true);
+  assertEquals(MountMotion.AirPose.RISE, state.pose());
+  assertEquals(MountMotion.AirPose.FALL, state.update(false, false, -.08, .1, false, true));
+  assertEquals(MountMotion.AirPose.LAND, state.update(true, false, -.01, .1, false, true));
+  assertEquals(MountMotion.AirPose.TAKEOFF, state.update(false, false, .25, .1, true, true));
+  assertEquals(MountMotion.AirPose.GROUND, state.update(false, true, -.1, .1, false, true));
+ }
+
+ @Test void highSpeedJumpCarriesTheRunWithoutAddingAnotherTakeoffImpulse() {
+  var run = new MountMotion.RunningJump();
+  var forward = new net.minecraft.world.phys.Vec3(0, 0, 1);
+  for (double step : new double[] {1.74, 1.87, 1.89}) run.recordGround(forward.scale(step));
+  run.start("rainbow_unicorn", 1, forward);
+  assertTrue(run.active());
+  var current = new net.minecraft.world.phys.Vec3(.12, .65, 1.1);
+  var acceleration = forward.scale(.4);
+  var staged = run.beforeMove(current, acceleration);
+  assertEquals(1.87 * .98, staged.z + acceleration.z, 1e-6);
+  assertEquals(current.y, staged.y);
+  assertEquals(current.x, staged.x);
+  var originalGroundAndJumpInput = forward.scale(.85);
+  assertEquals(1.87 * .98,
+      run.beforeMove(current, originalGroundAndJumpInput).z + originalGroundAndJumpInput.z, 1e-6);
+  double displacement = staged.z + acceleration.z;
+  double distance = displacement;
+  for (int i = 1; i <= 10; i++) {
+   run.afterMove(forward.scale(displacement), false);
+   displacement = run.beforeMove(forward.scale(displacement * .91), net.minecraft.world.phys.Vec3.ZERO).z;
+   distance += displacement;
+  }
+  assertTrue(distance > 16);
+  run.afterMove(net.minecraft.world.phys.Vec3.ZERO, true);
+  assertFalse(run.active());
+  run.reset();
+  run.start("rainbow_unicorn", 1, forward);
+  assertFalse(run.active());
+ }
+
+ @Test void upperApexAndFastLandingAreContinuous() {
+  var air = new MountMotion.AirMotion();
+  assertEquals(MountMotion.AirPose.TAKEOFF, air.update(false, false, .6, 1.6, true, false));
+  air.update(false, false, .5, 1.6, false, false);
+  assertEquals(MountMotion.AirPose.RISE, air.update(false, false, .4, 1.6, false, false));
+  assertEquals(MountMotion.AirPose.RISE, air.update(false, false, -.01, 1.6, false, false));
+  assertEquals(MountMotion.AirPose.FALL, air.update(false, false, -.04, 1.6, false, false));
+  assertEquals(MountMotion.AirPose.RUN_LAND, air.update(true, false, -.02, 1.6, false, false));
+  assertEquals(MountMotion.AirPose.TAKEOFF, air.update(false, false, .55, 1.6, true, false));
+ }
+
+ @Test void aRateChangeDoesNotMoveAnAlreadyRenderedFrameBackwards() {
+  var clock = new MountMotion.PlaybackClock();
+  clock.reset(100);
+  assertEquals(4, clock.advance(102, 2), 1e-6);
+  assertEquals(4, clock.advance(102, .5), 1e-6);
+  assertEquals(5, clock.advance(104, .5), 1e-6);
+  clock.reset(104);
+  assertEquals(1, clock.advance(105, 1), 1e-6);
+ }
+ @Test void unicornCanStayInGallopAtFullSpeedAndTurnsByTheShortestPath() {
+  var cadence = MountMotion.Cadence.forSpecies("rainbow_unicorn");
+  var motion = new MountMotion.GroundMotion();
+  for (int i = 0; i < 16; i++) motion.update(1.87, cadence);
+  assertEquals(MountMotion.Gait.GALLOP, motion.gait());
+  assertEquals(12f, MountMotion.steeredYaw(0, 90, 0), 1e-6);
+  assertEquals(6f, MountMotion.steeredYaw(0, 90, 1), 1e-6);
+  assertEquals(182f, MountMotion.steeredYaw(178, -178, 1), 1e-6);
+  assertEquals(-6f, MountMotion.steeredYaw(0, -90, 1), 1e-6);
+ }
+
+ @Test void iceCompensationPreservesTractionAndSuppressesSideSlip() {
+  for (float ice : new float[] {.98f, .989f}) {
+   double sameInput = Math.pow(.6 / ice, 3) * MountMotion.iceInputCompensation(ice);
+   assertEquals(1, sameInput, 1e-6);
+   assertEquals(.546, .91 * ice * MountMotion.NORMAL_FRICTION / ice, 1e-6);
+  }
+  var velocity = new net.minecraft.world.phys.Vec3(.6, .12, .4);
+  var forward = new net.minecraft.world.phys.Vec3(0, 0, 1);
+  var held = MountMotion.iceSteer(velocity, forward);
+  assertEquals(.4, held.z, 1e-6);
+  assertEquals(.216, held.x, 1e-6);
+  assertEquals(.12, held.y, 1e-6);
+ }
+
+ @Test void wolfSwimUsesDepthHysteresisAndBoundedBuoyancy() {
+  assertFalse(MountMotion.swimming(.45, false, false));
+  assertTrue(MountMotion.swimming(.56, false, false));
+  assertTrue(MountMotion.swimming(.45, true, false));
+  assertFalse(MountMotion.swimming(.30, true, false));
+  assertFalse(MountMotion.swimming(.60, true, true));
+  assertTrue(MountMotion.swimming(.70, false, true));
+  var idle = net.minecraft.world.phys.Vec3.ZERO;
+  var forward = new net.minecraft.world.phys.Vec3(0, 0, 1);
+  var velocity = MountMotion.swimVelocity(idle, forward, .51f, .6, MountMotion.SWIM_CAPACITY, true, false, true);
+  assertTrue(velocity.y > 0 && velocity.y <= .12);
+  assertEquals(0, velocity.z);
+  for (int i = 0; i < 40; i++) {
+   velocity = MountMotion.swimVelocity(velocity.multiply(.8, .8, .8), forward, .51f, 0, MountMotion.SWIM_CAPACITY, true, false, false);
+  }
+  double landSpeed = .51 / (1 - .91 * .6);
+  assertTrue(velocity.z / landSpeed > .38 && velocity.z / landSpeed < .41);
+  assertEquals(0, MountMotion.swimVelocity(idle, forward, .51f, 0, 0, true, false, false).z, 1e-6);
+  assertTrue(MountMotion.swimVelocity(idle, forward, .51f, 0, 0, true, true, false).z > 0);
+  assertFalse(MountMotion.activelyPaddling(forward, forward, forward));
+  assertFalse(MountMotion.activelyPaddling(forward, idle, idle));
+  assertFalse(MountMotion.activelyPaddling(idle, idle, forward));
+  assertFalse(MountMotion.activelyPaddling(idle, forward.scale(-.014), forward));
+  assertTrue(MountMotion.activelyPaddling(forward, idle, forward));
+  assertTrue(MountMotion.activelyPaddling(forward.reverse(), idle, forward.reverse()));
+  assertEquals(180, MountMotion.migrateSwimDistance(24));
+  assertEquals(360, MountMotion.migrateSwimDistance(0));
+  assertEquals(0, MountMotion.migrateSwimDistance(48));
+  assertEquals(360, MountMotion.migrateSwimDistance(Float.NaN));
+  assertEquals(.44, MountMotion.swimSpeedFactor(MountMotion.SWIM_CAPACITY));
+  assertEquals(.44, MountMotion.swimSpeedFactor(MountMotion.SWIM_SLOW_THRESHOLD));
+  assertEquals(.33, MountMotion.swimSpeedFactor(MountMotion.SWIM_WARNING_THRESHOLD), 1e-6);
+  assertEquals(0, MountMotion.swimSpeedFactor(0));
+ }
+
+ @Test void unicornExportsHoofbeatsAndIndependentHairPivots() throws Exception {
+  String id = "rainbow_unicorn";
+  Path root = Path.of("src/main/resources/assets/tnc");
+  var geometry = JsonParser.parseString(Files.readString(root.resolve("geo/mount/" + id + ".geo.json")))
+      .getAsJsonObject().getAsJsonArray("minecraft:geometry").get(0).getAsJsonObject();
+  var bones = new HashMap<String, JsonObject>();
+  for (var bone : geometry.getAsJsonArray("bones")) {
+   var part = bone.getAsJsonObject();
+   bones.put(part.get("name").getAsString(), part);
+  }
+  assertEquals("run_mane_lean", bones.get("mane").get("parent").getAsString());
+  assertEquals("run_mane_lean", bones.get("mane_center").get("parent").getAsString());
+  assertEquals("run_tail_lean", bones.get("tail").get("parent").getAsString());
+  assertFalse(bones.get("run_mane_lean").has("cubes"));
+  assertFalse(bones.get("run_tail_lean").has("cubes"));
+  var clips = JsonParser.parseString(Files.readString(root.resolve("animations/mount/" + id + ".animation.json")))
+      .getAsJsonObject().getAsJsonObject("animations");
+  for (String mode : List.of("walk", "trot", "gallop")) {
+   var clip = clips.getAsJsonObject("animation." + id + "." + mode);
+   var effects = clip.getAsJsonObject("sound_effects");
+   assertEquals(mode.equals("trot") ? 2 : 4, effects.size());
+   for (var beat : effects.entrySet()) {
+    double time = Double.parseDouble(beat.getKey());
+    assertTrue(time >= 0 && time < clip.get("animation_length").getAsDouble());
+    assertEquals("hoofbeat", beat.getValue().getAsJsonObject().get("effect").getAsString());
+   }
+  }
+ }
+
  @Test void allExportedClipsResolveBonesAndLoopExactly()throws Exception{
   for(String id:List.of("rainbow_unicorn","mountain_goat","snow_wolf")){
    Path root=Path.of("src/main/resources/assets/tnc");
@@ -29,14 +225,21 @@ class LandMountResourceTest {
    Set<String> bones=new HashSet<>();for(var bone:geo.getAsJsonArray("bones"))assertTrue(bones.add(bone.getAsJsonObject().get("name").getAsString()));
    assertFalse(bones.contains("saddle"),"Bareback mounts must not ship saddle geometry");
    var clips=JsonParser.parseString(Files.readString(root.resolve("animations/mount/"+id+".animation.json"))).getAsJsonObject().getAsJsonObject("animations");
-   for(String mode:List.of("idle","walk","trot","gallop")){
-    var clip=clips.getAsJsonObject("animation."+id+"."+mode);assertNotNull(clip);assertTrue(clip.get("loop").getAsBoolean());double length=clip.get("animation_length").getAsDouble();assertTrue(length>0);
+   var modes = new ArrayList<>(List.of("idle","walk","trot","gallop","takeoff","rise","fall","land","run_land"));
+   if (id.equals("snow_wolf")) modes.addAll(List.of("swim", "tread_water", "swim_climb"));
+   for(String mode:modes){
+    var clip=clips.getAsJsonObject("animation."+id+"."+mode);assertNotNull(clip);
+    boolean cyclic = List.of("idle","walk","trot","gallop","swim","tread_water").contains(mode);
+    if(cyclic) assertTrue(clip.get("loop").getAsBoolean());
+    else assertEquals("hold_on_last_frame", clip.get("loop").getAsString());
+    double length=clip.get("animation_length").getAsDouble();assertTrue(length>0);
     for(var entry:clip.getAsJsonObject("bones").entrySet()){
      assertTrue(bones.contains(entry.getKey()),entry.getKey());
      for(var channel:entry.getValue().getAsJsonObject().entrySet()){
       var keys=channel.getValue().getAsJsonObject();var first=keys.get("0.0");assertNotNull(first);
       JsonElement end=null;for(var key:keys.entrySet()){double time=Double.parseDouble(key.getKey());assertTrue(time>=0&&time<=length+.0001);if(Math.abs(time-length)<.0001)end=key.getValue();}
-      assertEquals(first,end,id+"/"+mode+"/"+entry.getKey());
+      assertNotNull(end,id+"/"+mode+"/"+entry.getKey());
+      if(cyclic) assertEquals(first,end,id+"/"+mode+"/"+entry.getKey());
      }
     }
    }

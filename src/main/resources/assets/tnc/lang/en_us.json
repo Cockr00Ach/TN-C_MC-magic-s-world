@@ -1,4 +1,7 @@
 {
+  "message.tnc.snow_wolf.tired": "Your snow wolf is nearly exhausted. Head for shore.",
+  "hud.tnc.snow_wolf.swim_stamina": "Swim stamina %s%%",
+  "hud.tnc.snow_wolf.swim_exhausted": "Swim stamina depleted",
   "entity.tnc.echo_core": "The Echoing Mirror",
   "entity.tnc.echo_double": "Mirror Double",
   "entity.tnc.echo_rod_hook": "Mirror Fishing Hook",
