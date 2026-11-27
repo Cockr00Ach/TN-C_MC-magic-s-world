@@ -3,6 +3,7 @@ package com.tnc.tnc.client;
 import com.tnc.tnc.TNMod;
 import com.tnc.tnc.magic.MagicStone;
 import com.tnc.tnc.magic.MagicStoneData;
+import com.tnc.tnc.mount.client.SnowWolfStaminaOverlay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -269,6 +270,9 @@ public final class MagicStoneHud {
 
         // 剑形条：加入战士磨砺后显示真实磨砺；未加入者保留旧护甲显示。
         drawTemperingBar(minecraft, graphics, width / 2 + TEMPERING_BAR_X_OFFSET, height);
+        int staminaY = height - TEMPERING_BAR_TOP_MARGIN - BAR_H - 3;
+        SnowWolfStaminaOverlay.render(minecraft, graphics, event.getPartialTick(),
+                width / 2 + TEMPERING_BAR_X_OFFSET, staminaY, BAR_W);
 
         // 右半边：和饱食度同一套贴图规格，紧贴它正上方
         drawManaBar(minecraft, graphics, width / 2 + MANA_BAR_X_OFFSET, height);

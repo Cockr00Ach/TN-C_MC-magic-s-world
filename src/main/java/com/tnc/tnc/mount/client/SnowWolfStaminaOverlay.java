@@ -7,16 +7,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = "tnc", value = Dist.CLIENT)
 public final class SnowWolfStaminaOverlay {
-    private static final int WIDTH = 81;
     private static final int FULL_DISPLAY_TICKS = 20;
     private static LandMount displayedWolf;
     private static int lastStamina;
@@ -48,29 +44,44 @@ public final class SnowWolfStaminaOverlay {
         else if (linger > 0) --linger;
     }
 
-    private static void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int width, int height) {
-        var minecraft = Minecraft.getInstance();
-        if (minecraft.options.hideGui || linger <= 0 || displayedWolf == null || displayedWolf != riddenWolf()) return;
-        int left = 10;
-        int right = left + WIDTH;
-        int y = height / 2 + 15;
+    public static void render(Minecraft minecraft, GuiGraphics graphics, float partialTick, int x, int y, int width) {
+        if (linger <= 0 || displayedWolf == null || displayedWolf != riddenWolf()) return;
+        final int ice = 0xFF7DE5F5;
+        final int amber = 0xFFF4C958;
+        final int exhausted = 0xFFF58666;
+        int accent = stamina <= MountMotion.SWIM_WARNING_THRESHOLD ? exhausted
+                : stamina <= MountMotion.SWIM_SLOW_THRESHOLD ? amber : ice;
+        int end = x + width;
+
+        graphics.fill(x, y + 2, end, y + 11, 0xF3131B26);
+        graphics.fill(x + 2, y + 1, end - 2, y + 12, 0xF3131B26);
+        graphics.fill(x + 2, y + 1, end - 2, y + 2, 0xFF4A6576);
+        graphics.fill(x + 2, y + 11, end - 2, y + 12, 0xFF273C4D);
+        graphics.fill(x + 2, y + 2, x + 5, y + 3, accent);
+        graphics.fill(end - 5, y + 2, end - 2, y + 3, accent);
+
+        // Three stepped rows form the ice crystal on the left end.
+        graphics.fill(x + 6, y + 3, x + 7, y + 10, accent);
+        graphics.fill(x + 4, y + 5, x + 9, y + 8, accent);
+        graphics.fill(x + 5, y + 6, x + 8, y + 7, 0xFFF1FDFF);
+
+        int track = x + 12;
+        int trackEnd = end - 3;
+        graphics.fill(track, y + 7, trackEnd, y + 10, 0xFF253746);
         float fraction = Mth.lerp(partialTick, lastStamina, stamina) / MountMotion.SWIM_CAPACITY;
-        int color = stamina <= MountMotion.SWIM_WARNING_THRESHOLD ? 0xFFFF854D
-                : stamina <= MountMotion.SWIM_SLOW_THRESHOLD ? 0xFFF4C958 : 0xFF61CAFB;
-        graphics.fill(left, y, right, y + 6, 0xDC182631);
-        int filled = Mth.ceil((WIDTH - 2) * fraction);
-        if (filled > 0) graphics.fill(left + 1, y + 1, left + 1 + filled, y + 5, color);
+        int filled = track + Mth.ceil((trackEnd - track) * fraction);
+        if (filled > track) {
+            graphics.fill(track, y + 8, filled, y + 10, accent);
+            graphics.fill(track, y + 7, filled, y + 8, 0xFFDDEFF4);
+        }
         Component label = stamina == 0 ? Component.translatable("hud.tnc.snow_wolf.swim_exhausted")
                 : Component.translatable("hud.tnc.snow_wolf.swim_stamina",
                         Mth.ceil(100f * stamina / MountMotion.SWIM_CAPACITY));
-        graphics.drawString(minecraft.font, label, left, y - 10, color);
-    }
-
-    @Mod.EventBusSubscriber(modid = "tnc", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static final class Registration {
-        @SubscribeEvent
-        public static void registerOverlay(RegisterGuiOverlaysEvent event) {
-            event.registerAbove(VanillaGuiOverlay.AIR_LEVEL.id(), "snow_wolf_stamina", SnowWolfStaminaOverlay::render);
-        }
+        graphics.pose().pushPose();
+        graphics.pose().translate((track + trackEnd) / 2f, y + 2, 0);
+        float textScale = Math.min(.5f, (trackEnd - track) / (float) Math.max(1, minecraft.font.width(label)));
+        graphics.pose().scale(textScale, textScale, 1);
+        graphics.drawCenteredString(minecraft.font, label, 0, 0, 0xFFEAF9FF);
+        graphics.pose().popPose();
     }
 }
