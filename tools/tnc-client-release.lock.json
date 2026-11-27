@@ -1,8 +1,8 @@
 {
-  "sourceCommit": "24fa59901931f9f3696b757c5896f65fa1a2d0ac",
+  "sourceCommit": "84915d37a1acd6ba2f0000871b305be24f36dae9",
   "sourceTrees": {
-    "src/main": "14bdd932780aa121616dcd8cbe2fc19063ad00e7",
-    "build.gradle": "59bd486e72f8280916a280121970678ba7b9357a",
+    "src/main": "2ddbe3b19e5e45734a6824a4ec7f1642134185dc",
+    "build.gradle": "3c7a16988823bcb64367924a62d6e80f79732b88",
     "gradle.properties": "221940de3a996a25dde293417d320a6c184b2f36",
     "settings.gradle": "758df8b3aff684c767e6121a5549e4f0d934d2b4",
     "gradle/wrapper": "70acb378054fe4fa598ea78e240dc3fa18cd63ee"
@@ -11,8 +11,8 @@
     "id": "tnc",
     "folder": "mods",
     "name": "tnc-1.0.0.jar",
-    "url": "https://github.com/Cockr00Ach/TN-C_MC-magic-s-world/releases/download/team-client-24fa59901931/tnc-1.0.0.jar",
-    "size": 135675697,
-    "sha256": "729fa1965c113ec50a219f78f80b194e4591f0068bb04cde90f21b1c7fffd603"
+    "url": "https://github.com/Cockr00Ach/TN-C_MC-magic-s-world/releases/download/team-client-84915d37a1ac/tnc-1.0.0.jar",
+    "size": 161310247,
+    "sha256": "dd72b3f4bbb3e5d58d76487ba3b4e244275f0007610d15bb7c08784f1069133f"
   }
 }
