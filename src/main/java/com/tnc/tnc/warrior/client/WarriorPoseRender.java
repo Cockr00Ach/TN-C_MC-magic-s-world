@@ -3,6 +3,7 @@ package com.tnc.tnc.warrior.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.tnc.tnc.TNMod;
+import com.tnc.tnc.mount.LandMount;
 import java.util.HashSet;
 import java.util.Set;
 import net.minecraft.world.entity.player.Player;
@@ -37,6 +38,10 @@ public final class WarriorPoseRender {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void pre(RenderPlayerEvent.Pre event) {
+        if (event.getEntity().getVehicle() instanceof LandMount) {
+            // Rotating the entire rider would lift the braced legs off the mount.
+            return;
+        }
         float yaw = WarriorAnimationClient.rootYawDegrees(event.getEntity());
         if (yaw == 0f) {
             return;

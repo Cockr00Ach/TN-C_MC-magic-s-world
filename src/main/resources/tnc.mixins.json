@@ -15,14 +15,14 @@
   ],
   "client": [
     "BronzeHandInvoker",
+    "MountCameraInvoker",
     "VoiceSpellHotbarMixin",
     "BronzeHeldItemMixin",
     "MusicManagerMixin",
     "OpeningHeldItemMixin",
     "SkyhavenVoxyImportMixin",
     "OpeningPlayerPoseMixin",
-    "EchoPlayerPoseMixin",
-    "LandMountPlayerPoseMixin"
+    "EchoPlayerPoseMixin"
   ],
   "injectors": {
     "defaultRequire": 0

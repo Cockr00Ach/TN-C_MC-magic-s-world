@@ -1,12 +1,20 @@
 package com.tnc.tnc.mount.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.mount.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
@@ -17,7 +25,42 @@ public final class LandMountRenderer extends GeoEntityRenderer<LandMount>{
         withScale(scale);
         shadowRadius = scale;
     }
+    @Override
+    public void renderRecursively(PoseStack pose, LandMount mount, GeoBone bone,
+                                  RenderType type, MultiBufferSource buffers, VertexConsumer out,
+                                  boolean rerender, float partial, int light, int overlay,
+                                  float red, float green, float blue, float alpha) {
+        // The neck, head, horns and mane share this subtree on all three mounts.
+        if (bone.getName().equals("neck") && MountRidingCamera.isActiveFor(mount)) return;
+        super.renderRecursively(pose, mount, bone, type, buffers, out, rerender, partial, light, overlay,
+                red, green, blue, alpha);
+    }
+
     private static final class Model extends GeoModel<LandMount>{
+        @Override
+        public void setCustomAnimations(LandMount mount, long instanceId, AnimationState<LandMount> state) {
+            super.setCustomAnimations(mount, instanceId, state);
+            if (mount.onGround() && mount.getControllingPassenger() instanceof LocalPlayer rider
+                    && rider.zza > 0 && Minecraft.getInstance().options.keyJump.isDown()) {
+                var body = getAnimationProcessor().getBone("body");
+                if (body != null) {
+                    body.setPosY(body.getPosY() - .42f * rider.getJumpRidingScale());
+                }
+            }
+            if (mount.species().equals("rainbow_unicorn")) {
+                float lean = mount.visualRunLean(state.getPartialTick());
+                setRunHairPitch("run_mane_lean", lean, 5);
+                setRunHairPitch("run_tail_lean", lean, 9);
+            }
+        }
+
+        private void setRunHairPitch(String name, float lean, float degrees) {
+            var bone = getAnimationProcessor().getBone(name);
+            if (bone != null) {
+                bone.setRotX((float) Math.toRadians(lean * degrees));
+            }
+        }
+
         private ResourceLocation resource(LandMount mount,String folder,String suffix){return ResourceLocation.fromNamespaceAndPath("tnc",folder+mount.species()+suffix);}
         @Override public ResourceLocation getModelResource(LandMount m){return resource(m,"geo/mount/",".geo.json");}
         @Override public ResourceLocation getTextureResource(LandMount m){return resource(m,"textures/entity/mount/",".png");}
