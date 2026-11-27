@@ -51,10 +51,9 @@ public final class SnowWolfStaminaOverlay {
     private static void render(ForgeGui gui, GuiGraphics graphics, float partialTick, int width, int height) {
         var minecraft = Minecraft.getInstance();
         if (minecraft.options.hideGui || linger <= 0 || displayedWolf == null || displayedWolf != riddenWolf()) return;
-        int right = width / 2 + 91;
-        int left = right - WIDTH;
-        int y = height - gui.rightHeight;
-        gui.rightHeight += 19;
+        int left = 10;
+        int right = left + WIDTH;
+        int y = height / 2 + 15;
         float fraction = Mth.lerp(partialTick, lastStamina, stamina) / MountMotion.SWIM_CAPACITY;
         int color = stamina <= MountMotion.SWIM_WARNING_THRESHOLD ? 0xFFFF854D
                 : stamina <= MountMotion.SWIM_SLOW_THRESHOLD ? 0xFFF4C958 : 0xFF61CAFB;
@@ -64,7 +63,7 @@ public final class SnowWolfStaminaOverlay {
         Component label = stamina == 0 ? Component.translatable("hud.tnc.snow_wolf.swim_exhausted")
                 : Component.translatable("hud.tnc.snow_wolf.swim_stamina",
                         Mth.ceil(100f * stamina / MountMotion.SWIM_CAPACITY));
-        graphics.drawString(minecraft.font, label, right - minecraft.font.width(label), y - 10, color);
+        graphics.drawString(minecraft.font, label, left, y - 10, color);
     }
 
     @Mod.EventBusSubscriber(modid = "tnc", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

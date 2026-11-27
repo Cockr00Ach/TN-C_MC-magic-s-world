@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -278,6 +279,30 @@ public final class LandMount extends Horse implements GeoEntity {
                 entityData.set(UNICORN_RUN_TICKS, unicornRunTicks);
             }
         }
+    }
+
+    float absorbRiderDamage(ServerPlayer rider, DamageSource source, float damage) {
+        if (!isAlive() || getControllingPassenger() != rider || rider.getVehicle() != this
+                || isInvulnerableTo(source) || !net.minecraftforge.common.ForgeHooks.onLivingAttack(this, source, damage)) {
+            return damage;
+        }
+        // The rider already passed the attack checks. Allocate the hit once, before rider armor.
+        float absorbed = Math.min(damage, getHealth());
+        if (source.getEntity() instanceof LivingEntity attacker && attacker != this) {
+            setLastHurtByMob(attacker);
+            if (attacker instanceof Player player) {
+                lastHurtByPlayer = player;
+                lastHurtByPlayerTime = 100;
+            }
+        }
+        getCombatTracker().recordDamage(source, absorbed);
+        setHealth(getHealth() - absorbed);
+        level().broadcastDamageEvent(this, source);
+        if (getHealth() <= 0) {
+            die(source);
+            if (!isAlive()) ejectPassengers();
+        }
+        return damage - absorbed;
     }
 
     @Override

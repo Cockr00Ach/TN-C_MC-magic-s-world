@@ -1,8 +1,12 @@
 package com.tnc.tnc.mount.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.mount.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -10,6 +14,7 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import software.bernie.geckolib.core.animation.AnimationState;
+import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
@@ -20,6 +25,17 @@ public final class LandMountRenderer extends GeoEntityRenderer<LandMount>{
         withScale(scale);
         shadowRadius = scale;
     }
+    @Override
+    public void renderRecursively(PoseStack pose, LandMount mount, GeoBone bone,
+                                  RenderType type, MultiBufferSource buffers, VertexConsumer out,
+                                  boolean rerender, float partial, int light, int overlay,
+                                  float red, float green, float blue, float alpha) {
+        // The neck, head, horns and mane share this subtree on all three mounts.
+        if (bone.getName().equals("neck") && MountRidingCamera.isActiveFor(mount)) return;
+        super.renderRecursively(pose, mount, bone, type, buffers, out, rerender, partial, light, overlay,
+                red, green, blue, alpha);
+    }
+
     private static final class Model extends GeoModel<LandMount>{
         @Override
         public void setCustomAnimations(LandMount mount, long instanceId, AnimationState<LandMount> state) {
