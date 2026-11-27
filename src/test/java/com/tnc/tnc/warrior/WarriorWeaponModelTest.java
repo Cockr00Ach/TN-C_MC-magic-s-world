@@ -36,7 +36,10 @@ class WarriorWeaponModelTest {
                     }
                 }
             }
-            try(var stream = getClass().getResourceAsStream("/assets/tnc/textures/item/"+id+".png")) {
+            var texture = model.getAsJsonObject("textures").get("0").getAsString();
+            assertTrue(texture.startsWith("tnc:"), id);
+            try(var stream = getClass().getResourceAsStream("/assets/tnc/textures/"+texture.substring(4)+".png")) {
+                assertNotNull(stream,texture);
                 var image = ImageIO.read(stream);
                 assertEquals(model.getAsJsonArray("texture_size").get(0).getAsInt(), image.getWidth(), id);
                 assertEquals(model.getAsJsonArray("texture_size").get(1).getAsInt(), image.getHeight(), id);

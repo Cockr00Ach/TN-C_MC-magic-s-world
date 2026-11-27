@@ -4,7 +4,7 @@ import com.google.gson.JsonParser;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.bronze.client.BronzePuppetModel;
-import java.nio.charset.StandardCharsets;
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,11 +19,15 @@ class BronzeArtResourcesTest {
     @Test void everyWeaponIsAcceptedByTheActualVanillaModelDeserializer() throws Exception {
         for(var kind:BronzeProfile.values()){
             assertTrue(Files.readString(ASSETS.resolve("models/item/"+kind.id()+".json")).length()<=2_097_152,"Keep dense item assets within the existing Windows installer JSON parser limit");
-            try(var reader=Files.newBufferedReader(ASSETS.resolve("models/item/"+kind.id()+".json"),StandardCharsets.UTF_8)){
-                var model=BlockModel.fromStream(reader);
-                assertFalse(model.getElements().isEmpty());
-                for(var element:model.getElements())assertTrue(element.faces.size()>=1&&element.faces.size()<=6,"Only visible faces are required for vanilla items");
+            var raw=JsonParser.parseString(Files.readString(ASSETS.resolve("models/item/"+kind.id()+".json"))).getAsJsonObject();
+            if(raw.has("loader")){
+                assertEquals("forge:obj",raw.remove("loader").getAsString());
+                var mesh=raw.get("model").getAsString();
+                assertTrue(mesh.startsWith("tnc:") && Files.isRegularFile(ASSETS.resolve(mesh.substring(4))),mesh);
             }
+            var model=BlockModel.fromStream(new StringReader(raw.toString()));
+            assertFalse(model.getElements().isEmpty());
+            for(var element:model.getElements())assertTrue(element.faces.size()>=1&&element.faces.size()<=6,"Vanilla fallback retains valid faces");
         }
     }
     @Test void puppetBakesWithUnstretchedHighDensityUVsAndRotatedFaceDetails() throws Exception {
