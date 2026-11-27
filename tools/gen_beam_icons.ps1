@@ -8,20 +8,28 @@
 #
 # Idempotent: recreates every file from scratch on each run.
 # ASCII-only source on purpose (no non-ASCII literals) to survive encoding round-trips.
-# The modpack folder names are non-ASCII, so they are reconstructed from code points.
+# The pack folder name is non-ASCII, so it is discovered at runtime (see
+# Get-DefaultPackRoot below) rather than written as a literal here.
 #
 # Usage:
-#   pwsh -File D:\ModTest\tools\gen_beam_icons.ps1
-#   pwsh -File D:\ModTest\tools\gen_beam_icons.ps1 -PackRoot 'E:\some\pack'
-#   pwsh -File D:\ModTest\tools\gen_beam_icons.ps1 -RepoRoot 'D:\ModTest'
+#   pwsh -File <repo>\tools\gen_beam_icons.ps1
+#   pwsh -File <repo>\tools\gen_beam_icons.ps1 -PackRoot '<...>\versions\<pack>'
+#   pwsh -File <repo>\tools\gen_beam_icons.ps1 -RepoRoot '<repo>'
 
 param(
-    [string]$RepoRoot = 'D:\ModTest',
+    [string]$RepoRoot = '',
     [string]$PackRoot = ''
 )
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
+
+# Shared discovery (<repo>, the workspace pack, the live instance). This replaced
+# a hardcoded D:\ModTest plus an E:\download path whose pack name had to be
+# rebuilt from code points just to keep this file ASCII-only.
+. (Join-Path $PSScriptRoot '_common.ps1')
+
+if ([string]::IsNullOrWhiteSpace($RepoRoot)) { $RepoRoot = $TncRepoRoot }
 
 # ---------------------------------------------------------------- constants
 $SIZE = 32          # final icon edge length, identical to the existing icons
@@ -37,19 +45,24 @@ $OUTLINE = [System.Drawing.Color]::FromArgb(215, 46, 33, 10)
 $OUTLINE_SOFT = [System.Drawing.Color]::FromArgb(120, 46, 33, 10)
 
 # ---------------------------------------------------------------- pack path
+# The live game instance (<versions>\<pack>); falls back to the workspace copy
+# inside the repo when no launcher instance is found.
 function Get-DefaultPackRoot {
-    # 'E:\download\' + U+6B63 U+5F0F U+7248 + ' 2.12.6.1' + '\.minecraft\versions\' +
-    # U+5143 U+7D20 U+89C9 U+9192 + '1.4.3-' + U+9B54 U+6539 U+7248 + '-20260915'
-    $cps1 = @(0x6B63, 0x5F0F, 0x7248)
-    $cps2 = @(0x5143, 0x7D20, 0x89C9, 0x9192)
-    $cps3 = @(0x9B54, 0x6539, 0x7248)
-    $s1 = -join ($cps1 | ForEach-Object { [char]$_ })
-    $s2 = -join ($cps2 | ForEach-Object { [char]$_ })
-    $s3 = -join ($cps3 | ForEach-Object { [char]$_ })
-    return ('E:\download\' + $s1 + ' 2.12.6.1\.minecraft\versions\' + $s2 + '1.4.3-' + $s3 + '-20260915')
+    $work = Find-TncWorkPack
+    if ($work) {
+        $live = Find-TncLivePack -WorkPack $work
+        if ($live) { return $live }
+        return $work
+    }
+    return $null
 }
 
 if ([string]::IsNullOrWhiteSpace($PackRoot)) { $PackRoot = Get-DefaultPackRoot }
+if ([string]::IsNullOrWhiteSpace($PackRoot)) {
+    Write-Host 'ERROR: could not locate the modpack (no live instance and no workspace copy).'
+    Write-Host '       Pass it explicitly:  -PackRoot "<...>\versions\<pack>"'
+    exit 1
+}
 
 # ---------------------------------------------------------------- helpers
 function New-Color {
