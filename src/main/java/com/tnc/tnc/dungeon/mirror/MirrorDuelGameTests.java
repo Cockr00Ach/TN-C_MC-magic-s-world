@@ -138,12 +138,12 @@ public final class MirrorDuelGameTests {
         m.setHealth(8);
         for(int i=0;i<14;i++)MirrorMelee.tick(m,p);
         m.hurt(m.damageSources().playerAttack(p),2);MirrorMelee.tick(m,p);
-        h.assertTrue(s.getString("Move").equals("recover")&&s.getInt("Apples")==2&&!m.hasEffect(MobEffects.ABSORPTION),"Valid incoming damage interrupts an unfinished bite");
+        h.assertTrue(s.getString("Move").equals("recover")&&s.getInt("Apples")==64&&!m.hasEffect(MobEffects.ABSORPTION),"Valid incoming damage interrupts an unfinished bite");
         s.putBoolean("Interrupted",false);s.putString("Move","apple");s.putInt("Age",0);s.putInt("End",32);
         for(int i=0;i<31;i++)MirrorMelee.tick(m,p);
         h.assertTrue(!m.hasEffect(MobEffects.ABSORPTION),"Full use time required");
         MirrorMelee.tick(m,p);
-        h.assertTrue(s.getInt("Apples")==1&&m.hasEffect(MobEffects.ABSORPTION)&&m.hasEffect(MobEffects.REGENERATION),"Normal golden apple grants real effects");
+        h.assertTrue(s.getInt("Apples")==63&&m.hasEffect(MobEffects.ABSORPTION)&&m.hasEffect(MobEffects.REGENERATION),"Normal golden apple grants real effects");
         h.succeed();
     }
     @GameTest(template="building_test_empty",batch="echo_duel_mechanics",timeoutTicks=110)
@@ -195,20 +195,48 @@ public final class MirrorDuelGameTests {
     @GameTest(template="building_test_empty",batch="echo_duel_mechanics",timeoutTicks=60)
     public static void pressurePreviewsWebBeforeItAppearsThenSprintsAway(GameTestHelper h){
         var p=AdventureGameTests.player(h);var m=duel(h,p);var level=h.getLevel();
-        var s=commit(m,p,"recover",1);s.remove("Move");s.putInt("Pressure",2);s.putInt("HitAt",s.getInt("Clock"));s.putBoolean("Lava",false);
+        var s=commit(m,p,"recover",1);s.remove("Move");s.putInt("Pressure",2);s.putInt("HitAt",s.getInt("Clock"));s.putBoolean("Lava",false);s.putInt("ReadyPillar",Integer.MAX_VALUE);s.putInt("ReadyTrap",0);
         var at=m.blockPosition();level.setBlockAndUpdate(at.offset(0,0,1),Blocks.AIR.defaultBlockState());
         MirrorMelee.tick(m,p);
         h.assertTrue(s.getString("Move").equals("web")&&m.getMainHandItem().is(Items.COBWEB),"Mirror shows web before laying trap");
-        var trap=BlockPos.containing(s.getDouble("TrapX"),s.getDouble("TrapY"),s.getDouble("TrapZ"));
+        var trap=p.blockPosition().east();
+        level.setBlockAndUpdate(trap,Blocks.AIR.defaultBlockState());
+        p.setPos(Vec3.atBottomCenterOf(trap));
         for(int i=0;i<6;i++)MirrorMelee.tick(m,p);
         h.assertTrue(!level.getBlockState(trap).is(Blocks.COBWEB),"Retreating hand telegraphs placement");
         MirrorMelee.tick(m,p);
-        h.assertTrue(level.getBlockState(trap).is(Blocks.COBWEB)&&s.getInt("Webs")==1,"One web placed, limited stock");
+        h.assertTrue(level.getBlockState(trap).is(Blocks.COBWEB)&&s.getInt("Webs")==7,"One web placed, limited stock");
         for(int i=0;i<6;i++)MirrorMelee.tick(m,p);
         h.assertTrue(s.getString("Move").equals("flee")&&m.isSprinting(),"Turns and sprints after sealing route");
         h.assertTrue(MirrorTerrain.get(level).breakTool(level,m.runId(),trap,new ItemStack(Items.IRON_SWORD)),"Attackers can cut the actual web");
         h.succeed();
     }
+    @GameTest(template="building_test_empty",batch="echo_duel_mechanics",timeoutTicks=60)
+    public static void retreatBuildsFourStepsAndShootsFromAbove(GameTestHelper h){
+        var p=AdventureGameTests.player(h);var m=duel(h,p);var level=h.getLevel();
+        var base=m.blockPosition();
+        for(int z=0;z<=3;z++)for(int y=0;y<=6;y++)level.setBlockAndUpdate(base.offset(0,y,z),Blocks.AIR.defaultBlockState());
+        level.setBlockAndUpdate(base.below(),Blocks.STONE.defaultBlockState());
+        var s=commit(m,p,"flee",38);
+        s.putInt("Age",7);s.putString("After","pillar");
+        s.putDouble("RouteX",m.getX());s.putDouble("RouteY",m.getY());s.putDouble("RouteZ",m.getZ());
+        m.setOnGround(true);MirrorMelee.tick(m,p);
+        h.assertTrue(s.getString("Move").equals("pillar"),"A completed retreat starts the building move");
+        for(int i=0;i<4;i++){
+            m.setPos(Vec3.atBottomCenterOf(base.above(i+1)).add(0,.15,0));
+            m.setOnGround(false);m.setDeltaMovement(0,.11,0);
+            MirrorMelee.tick(m,p);
+            h.assertTrue(level.getBlockState(base.above(i)).is(i==0?Blocks.CHISELED_DEEPSLATE:Blocks.COBBLESTONE),
+                    "Each jump places a real temporary block");
+        }
+        m.setPos(Vec3.atBottomCenterOf(base.above(4)));m.setOnGround(true);m.setDeltaMovement(Vec3.ZERO);
+        MirrorMelee.tick(m,p);
+        h.assertTrue(s.getString("Move").equals("bow"),"Reaching the top equips a bow");
+        for(int i=0;i<68;i++)MirrorMelee.tick(m,p);
+        h.assertTrue(s.getInt("Arrows")==61,"Sustained line of sight yields exactly three shots");
+        MirrorMelee.cleanup(level,m.runId());h.succeed();
+    }
+
     @GameTest(template="building_test_empty",batch="echo_duel_mechanics",timeoutTicks=60)
     public static void bucketNeedsLegalLandingAndDryHandsAfterScoop(GameTestHelper h){
         var p=AdventureGameTests.player(h);var m=duel(h,p);var l=h.getLevel();var at=m.blockPosition();

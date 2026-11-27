@@ -68,7 +68,7 @@ final class SanctumMesh {
         this.bones=bones;
     }
     static void request(String key){
-        if(READY.containsKey(key)||FAILED.contains(key)||!KEYS.contains(key))return;
+        if(READY.containsKey(key)||FAILED.contains(key)||!(KEYS.contains(key)||SanctumFaceAnimation.isFrameKey(key)))return;
         var resources=Minecraft.getInstance().getResourceManager();
         READING.computeIfAbsent(key,k->CompletableFuture.supplyAsync(()->{
             var path=ResourceLocation.fromNamespaceAndPath("tnc","models/sanctum/"+k+".mesh.gz");
@@ -130,6 +130,10 @@ final class SanctumMesh {
 
     void draw(Matrix4f base,MultiBufferSource buffers,SanctumPose pose,String subtree,int light,
               SanctumProjectedBlade.Strike lock,SanctumDemonReach reach,SanctumRupture rupture) {
+        var face = subtree == null && pose.action().equals("awaken")
+                ? SanctumFaceAnimation.at(pose.t() * AWAKEN, this == READY.get("bleeding") || this == READY.get("angel"))
+                : null;
+        Matrix4f faceAnchor = null;
         var transforms=new Matrix4f[bones.size()];
         boolean[] visible=new boolean[bones.size()],selected=new boolean[bones.size()];
         for(int i=0;i<bones.size();i++){
@@ -146,6 +150,7 @@ final class SanctumMesh {
             }
             transforms[i]=new Matrix4f(parent).translate(b.x(),b.y(),b.z());
             pose.animate(b.name(),transforms[i]);
+            if(face != null && b.name().equals("head")) faceAnchor = transforms[i];
         }
         if(pose.form().equals("demon")&&!pose.handOnly())SanctumDemonMotion.feet(base,bones,transforms);
         Matrix4f extremity=reach==null?null:reach.solve(bones,transforms);
@@ -155,6 +160,7 @@ final class SanctumMesh {
             for(int i=0;i<bones.size();i++){
                 if(!visible[i]||!selected[i])continue;
                 String bone = bones.get(i).name();
+                if (faceAnchor != null && SanctumFaceAnimation.replaces(bone)) continue;
                 SanctumMeshCut cut = rupture == null ? null : rupture.cut(bone, pose.handOnly(), transforms[i]);
                 if (pose.action().equals("awaken") && bone.equals("head_tears")) {
                     float length = SanctumPose.ease(pose.t() * AWAKEN, TEARS_START, TEARS_END);
@@ -168,6 +174,7 @@ final class SanctumMesh {
                 }
             }
         }
+        if(faceAnchor != null) face.draw(faceAnchor,buffers,new SanctumPose("awaken_face","",0,0,0,false),null,light);
         if(reach!=null)reach.edge(buffers,extremity);
         if(lock!=null || pose.form().equals("demon")){
             for(int i=0;i<bones.size();i++)if(visible[i]&&selected[i]){
@@ -244,5 +251,17 @@ final class SanctumMesh {
                     darkWing?value*.56F:value,alpha,source[a+3],source[a+4],OverlayTexture.NO_OVERLAY,packed,result[b+3],result[b+4],result[b+5]);
         }
     }
-    static void clear(){READING.clear();READY.clear();FAILED.clear();}
+    static void forget(String key) {
+        var task=READING.remove(key);
+        if (task != null) task.cancel(false);
+        READY.remove(key);
+        FAILED.remove(key);
+    }
+    static void forgetFaceFrames() {
+        var keys = new HashSet<>(READING.keySet());
+        keys.addAll(READY.keySet());
+        keys.addAll(FAILED);
+        for (String key : keys) if (SanctumFaceAnimation.isFrameKey(key)) forget(key);
+    }
+    static void clear(){SanctumFaceAnimation.resourcesChanged();READING.clear();READY.clear();FAILED.clear();}
 }

@@ -25,7 +25,7 @@ public final class SanctumFigures {
     private static ClientLevel world;
     private static void session(){
         var current=Minecraft.getInstance().level;
-        if(world!=current){TRACKED.clear();SanctumProjectedBlade.clear();SanctumCinematic.stop();world=current;}
+        if(world!=current){TRACKED.clear();SanctumProjectedBlade.clear();SanctumCinematic.stop();SanctumFaceAnimation.end();world=current;}
     }
     public static void accept(State packet){
         session();if(world==null||!world.dimension().location().equals(packet.dimension()))return;
@@ -34,10 +34,12 @@ public final class SanctumFigures {
         if(packet.action().equals("awaken")||packet.action().equals("rupture"))SanctumMesh.request(meshKey(packet.model()));
         if(packet.model().equals("angel"))SanctumMesh.request("bleeding");
         if(packet.model().equals("bleeding"))SanctumMesh.request("demon");
+        if(packet.model().equals("angel")||packet.action().equals("awaken"))SanctumFaceAnimation.prime(world.getGameTime());
         if(packet.action().equals("awaken")||packet.action().equals("rupture"))SanctumCinematic.start(packet);
     }
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event){
         if(event.phase!=TickEvent.Phase.END)return;session();
+        if(world!=null)SanctumFaceAnimation.tick(world.getGameTime());
         if(world!=null&&!TRACKED.isEmpty()){
             TRACKED.values().removeIf(tracked->{
                 var state=tracked.state();var entity=world.getEntity(state.id());

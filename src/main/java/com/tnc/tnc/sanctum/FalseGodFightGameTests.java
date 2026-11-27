@@ -127,8 +127,7 @@ public final class FalseGodFightGameTests {
         } finally {fight.close();near.discard();safe.discard();}
     }
     @GameTest(template="empty",batch="sanctum_gaze_eyes",timeoutTicks=40)
-    public static void faceEyeContactAndThreeBleedsArePersonal(GameTestHelper h) {
-        // The three-block template spawns underground. This fixture needs an open 52-block sightline to the eyes.
+    public static void failingGazeReceivesThreeBleedsWithoutDarkness(GameTestHelper h) {
         var f=new FalseGodFight(h.getLevel(),h.absolutePos(new BlockPos(3,3,3)).atY(128));
         var eyes=SanctumGameTests.participant(h);
         var back=SanctumGameTests.participant(h);
@@ -143,24 +142,14 @@ public final class FalseGodFightGameTests {
             }
             f.tick(party);f.phase=2;f.recovery=140;
             f.face(f.center.add(0,0,-1));
-            eyes.setYRot(0);eyes.setXRot(-76);back.setYRot(180);side.setYRot(90);
-            h.assertTrue(f.directEyeContact(eyes)&&!f.directEyeContact(side)&&!f.directEyeContact(back),
-                    "only a frontal look at the high eyes is eligible for the private scare");
-            place(side,f.center.add(0,0,-65));side.setYRot(0);side.setXRot(0);
-            h.assertTrue(!f.directEyeContact(side),"a distant viewer looking straight at the pedestal never sees the private face");
-            place(side,eyes.position());side.setYRot(90);
-            Vec3 face=f.center.add(0,52,-4);
-            var obstruction=BlockPos.containing(eyes.getEyePosition().lerp(face,.5));var old=f.level.getBlockState(obstruction);
-            f.level.setBlockAndUpdate(obstruction,net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
-            try{h.assertTrue(!f.directEyeContact(eyes),"solid wall occludes eye-to-eye contact");}
-            finally{f.level.setBlockAndUpdate(obstruction,old);}
+            eyes.setYRot(0);eyes.setXRot(0);back.setYRot(180);side.setYRot(90);
             lock(f,Move.GAZE,eyes);
             for(int i=1;i<=30;i++)f.skills.run(Move.GAZE,i);
             h.assertTrue(back.getHealth()==200 && !back.hasEffect(MobEffects.DARKNESS)
                     && eyes.getHealth()<200 && !eyes.hasEffect(MobEffects.DARKNESS)
                     && eyes.hasEffect(MobEffects.WEAKNESS) && eyes.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)
-                    && side.getHealth()<200 && side.hasEffect(MobEffects.DARKNESS),
-                    "back is safe, side sees darkness, and the wounded frontal viewer sees the private face unobscured");
+                    && side.getHealth()<200 && !side.hasEffect(MobEffects.DARKNESS),
+                    "the player who turns away is safe and neither failed look applies darkness");
             f.move=null;
             for(int tick=1;tick<=72;tick++) {
                 float hp=eyes.getHealth();for(var p:party)p.invulnerableTime=0;

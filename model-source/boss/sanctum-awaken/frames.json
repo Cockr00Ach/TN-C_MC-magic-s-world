@@ -1,0 +1,804 @@
+{
+  "format": "SCM2",
+  "bind": "head",
+  "coordinateSpace": "head-local blocks",
+  "replaceLayersOf": [
+    "head_shell",
+    "head_oculus",
+    "head_jaw",
+    "head_plumage_L",
+    "head_plumage_R"
+  ],
+  "samples": [
+    {
+      "tick": 0,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_000.mesh.gz",
+        "triangles": 6668,
+        "sha256": "a8cae73974209659ffecc2d8261b4e2d069dad7b4ce6f472f9202430d6828a3e"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_000_view.mesh.gz",
+        "triangles": 1406,
+        "sha256": "ee30d7764512288b2d4a48fa0b814ed603fdde27d25a48f909ddfa55e885f690"
+      }
+    },
+    {
+      "tick": 24,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_024.mesh.gz",
+        "triangles": 6742,
+        "sha256": "1461304916fec236f5e5d251596f749181b726161176dabb013d452891abf820"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_024_view.mesh.gz",
+        "triangles": 1447,
+        "sha256": "5b0d8440082cc09f8fe6d6987d0c052ffde5a86f5b3db1073a1d35b6d61598f9"
+      }
+    },
+    {
+      "tick": 25,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_025.mesh.gz",
+        "triangles": 6767,
+        "sha256": "8d86cf011223e8a505d3e05ff1242af46ece70e61d6765fd9fbab52d746fbbee"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_025_view.mesh.gz",
+        "triangles": 1447,
+        "sha256": "b298ad28934eb9e50af9099ffc1e68b6ced04af8004e179f1ddad72637e55bee"
+      }
+    },
+    {
+      "tick": 26,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_026.mesh.gz",
+        "triangles": 6827,
+        "sha256": "b0110299ad74b9831a8bf0c102cc5d753d9c035500d71fb1fc9caeb6aee28178"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_026_view.mesh.gz",
+        "triangles": 1465,
+        "sha256": "df280d5515d386f670830f1d3364ed9ed59eaec98824fb59d7947da8b3d855b1"
+      }
+    },
+    {
+      "tick": 27,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_027.mesh.gz",
+        "triangles": 6879,
+        "sha256": "e764f317da68b8ed9ce75883ae840c2071ebbb71a8b3a3510399ef83474e8486"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_027_view.mesh.gz",
+        "triangles": 1473,
+        "sha256": "32a45243b80cd5989e76f637bb98ef190e86e31047de16dca1d21de1a8739b95"
+      }
+    },
+    {
+      "tick": 28,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_028.mesh.gz",
+        "triangles": 6890,
+        "sha256": "282fc30c1850e4c0587e53fe920ae08347afd2b196f86cf53834e18064417da8"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_028_view.mesh.gz",
+        "triangles": 1470,
+        "sha256": "0ac590eac72b2a159ca584dfa1e4c09b7527e89f52be52675f909bd8f3c271cf"
+      }
+    },
+    {
+      "tick": 29,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_029.mesh.gz",
+        "triangles": 6957,
+        "sha256": "15690cdce9c7d0ed3227ab5df782225800d74ecc5066711e04942ce59b2bf7bc"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_029_view.mesh.gz",
+        "triangles": 1479,
+        "sha256": "13d5cf3ae6b3dd9fa684713de3dafcfcb2ed058091f6d452a68cbb2b724c2c16"
+      }
+    },
+    {
+      "tick": 30,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_030.mesh.gz",
+        "triangles": 6999,
+        "sha256": "f56297e7c4d4dbd0b61bd0e311a21f346e199b09dbfefec237ac462a80eb8409"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_030_view.mesh.gz",
+        "triangles": 1478,
+        "sha256": "f97e019df62351bbb2f04633da4b3c0110beee0a54c3731c10e7582b633cc3ed"
+      }
+    },
+    {
+      "tick": 31,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_031.mesh.gz",
+        "triangles": 7028,
+        "sha256": "b4d916bdddfd040db12f549ead8f8613fc0ae8188ef5ba7db7561ff138810c69"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_031_view.mesh.gz",
+        "triangles": 1503,
+        "sha256": "f42fbb3f973f5aa56dfbbf1669a4a1c07a42a653300f175aa266eccdc57c0d47"
+      }
+    },
+    {
+      "tick": 32,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_032.mesh.gz",
+        "triangles": 7314,
+        "sha256": "ce890738182973a0763eaae182b1cd3be55f263a1e6ac18957b2a74a2f8f7714"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_032_view.mesh.gz",
+        "triangles": 1537,
+        "sha256": "f5e489cbaf78691698dac1d7d0c780987a1aac9c937fce30f7564efa31852e43"
+      }
+    },
+    {
+      "tick": 33,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_033.mesh.gz",
+        "triangles": 7284,
+        "sha256": "60263bd0ad8b3e5bbce15a59d371e88cedc9ad5022a552ad2154f24a1265e2a0"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_033_view.mesh.gz",
+        "triangles": 1580,
+        "sha256": "84a053f9227f84b9b1d2f5acbeda3ebac5aa62f61a991d66c2fd24c671b1235e"
+      }
+    },
+    {
+      "tick": 34,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_034.mesh.gz",
+        "triangles": 7600,
+        "sha256": "cd3d2d6f902964dad05af567fcbdaaf71d45f6fde38e9119049aa49892c1c15e"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_034_view.mesh.gz",
+        "triangles": 1602,
+        "sha256": "3f88b89719af836b9b597a1015d1e3a81973d09ba43b58bdbcbff8d5a1114694"
+      }
+    },
+    {
+      "tick": 35,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_035.mesh.gz",
+        "triangles": 7860,
+        "sha256": "5d68e79b696c5c6175313c753381f5cb549408c464861ea9004cfa2f58fa9b7f"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_035_view.mesh.gz",
+        "triangles": 1662,
+        "sha256": "0599ea855be2ec2a0200b53cc8487fae34b6ec2c9ce7fce4ca7e4996fcf0503c"
+      }
+    },
+    {
+      "tick": 36,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_036.mesh.gz",
+        "triangles": 7986,
+        "sha256": "5b5070eb96c91214e2a2bab68fc3adc0dea748f83d5dd5a1824c3eab34fa268d"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_036_view.mesh.gz",
+        "triangles": 1702,
+        "sha256": "e81860aa6abbfdcea81ce675cda74a165411ed953347f99989116e445158e6bd"
+      }
+    },
+    {
+      "tick": 37,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_037.mesh.gz",
+        "triangles": 8115,
+        "sha256": "92f7603b2dca41128511649c456ae6bc9b8d5dbbb1571b44796018af88204af7"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_037_view.mesh.gz",
+        "triangles": 1751,
+        "sha256": "4a6dadffd9d75687e0d2b4c2d614d6163e3ec9482a884cdbd6f4ec8760a0ae1a"
+      }
+    },
+    {
+      "tick": 38,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_038.mesh.gz",
+        "triangles": 8154,
+        "sha256": "c66375a53a87dacf3d5f757477e6d3d1c68769a0e883ec5038da3a8f24b316dc"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_038_view.mesh.gz",
+        "triangles": 1754,
+        "sha256": "9b631724e063e6c5f765d5f928c832d0a4259d1c063deff0632136448c26731a"
+      }
+    },
+    {
+      "tick": 39,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_039.mesh.gz",
+        "triangles": 8385,
+        "sha256": "630d401dd73172e69ac51f82375b8610594f2acf4fef90f14b95c864692b1ea0"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_039_view.mesh.gz",
+        "triangles": 1775,
+        "sha256": "2c0166d5bccf465e432c5f649844e8690c66661dc38f662aa7000fb3243486d1"
+      }
+    },
+    {
+      "tick": 40,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_040.mesh.gz",
+        "triangles": 8424,
+        "sha256": "12462468ee0f23feaf355f82d5deac33c80187f4ce69cb298f4306cb48b70631"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_040_view.mesh.gz",
+        "triangles": 1802,
+        "sha256": "bbefea45614f532aed335494076564b1b529d3d32b0244e6e69acea440ebe7c0"
+      }
+    },
+    {
+      "tick": 41,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_041.mesh.gz",
+        "triangles": 8685,
+        "sha256": "145af00862b954e1463844afefd31ac6bc2918486cf4faaa503eb306e0e5501a"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_041_view.mesh.gz",
+        "triangles": 1823,
+        "sha256": "eaee86a6223764fcd7d3706a2db70cb25866a569aae152771b5e3e0d296932d5"
+      }
+    },
+    {
+      "tick": 42,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_042.mesh.gz",
+        "triangles": 8738,
+        "sha256": "d0e0db3bc015c6a5f3e15af2be72d7e378ffae24410b43b3571562e1fcdafa47"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_042_view.mesh.gz",
+        "triangles": 1859,
+        "sha256": "fb5b89e902e68151de4db0d9f9d8656acf51ca721e02a336ff4cdd39978ac91f"
+      }
+    },
+    {
+      "tick": 43,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_043.mesh.gz",
+        "triangles": 8795,
+        "sha256": "db96349c4d4cefce9c45f596f53e0af4d2e16b3187da2ebf12907d1b444a6273"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_043_view.mesh.gz",
+        "triangles": 1878,
+        "sha256": "2c28b8a2947f30bcb732a4ed6c681556c72e9f47f9bb07f3ac880477b42d5a05"
+      }
+    },
+    {
+      "tick": 44,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_044.mesh.gz",
+        "triangles": 9064,
+        "sha256": "647599b0fb75d81147bafd5fb837960ca8fd1add165a8b8c94eba2d21c60a54d"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_044_view.mesh.gz",
+        "triangles": 1921,
+        "sha256": "9a5c81d6832825004e4f40ef11f037200c9e346c524d640f1d0a1431a3955d7e"
+      }
+    },
+    {
+      "tick": 45,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_045.mesh.gz",
+        "triangles": 9188,
+        "sha256": "305569320db41ffe0f3a6b43b08b99e3a7f4c8195c1c0a4b7258cf74428319d3"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_045_view.mesh.gz",
+        "triangles": 1942,
+        "sha256": "ad3563d07867c7d5904cda8bd03c90df4da85949454722c2f02ebb3a262ad25c"
+      }
+    },
+    {
+      "tick": 46,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_046.mesh.gz",
+        "triangles": 9238,
+        "sha256": "cc745195f30324c5435647cff3aea3c43d7520bc730f473de0d702fd69b99a4b"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_046_view.mesh.gz",
+        "triangles": 1985,
+        "sha256": "59ac75855d64caccbea25f51a9c8f2730e00f6b27eb148e92a1405731711f43c"
+      }
+    },
+    {
+      "tick": 47,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_047.mesh.gz",
+        "triangles": 9222,
+        "sha256": "6063b8bae18680f3ce92474163b381de2b27fddf867518bc17b0e179f86aa572"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_047_view.mesh.gz",
+        "triangles": 1985,
+        "sha256": "25f997bfa2b1c2e4db9dc457ac7eb8dcbbbc1d6b2de6310072c63c48d0aa3243"
+      }
+    },
+    {
+      "tick": 48,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_048.mesh.gz",
+        "triangles": 9338,
+        "sha256": "c6c9395fffd474b13b56594628f913320ca2ab64dea8e07cf94a403b3d5cd75d"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_048_view.mesh.gz",
+        "triangles": 2009,
+        "sha256": "299467c07d3a202cf5af083f1e8fabbc54d2de136aeac730d66b0ab398af96ce"
+      }
+    },
+    {
+      "tick": 49,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_049.mesh.gz",
+        "triangles": 9293,
+        "sha256": "6c739ef954fd5d12e18737ca53c0dcb56b3eab9147f6679f9ebae536220f43d2"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_049_view.mesh.gz",
+        "triangles": 1989,
+        "sha256": "39ca23849ddcb08d812cd85055de386e215aef8df1030238e68b734f632e3d7b"
+      }
+    },
+    {
+      "tick": 50,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_050.mesh.gz",
+        "triangles": 9445,
+        "sha256": "ca910da952d7104561d1898cc78ad2fa35e3ff7d90bce0198ab5959aee79dd21"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_050_view.mesh.gz",
+        "triangles": 2022,
+        "sha256": "10cda90e71dcfe38d8b1243350770cab0ab2c2c0352f5d0b3a53b76f9cdd1b11"
+      }
+    },
+    {
+      "tick": 51,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_051.mesh.gz",
+        "triangles": 9192,
+        "sha256": "ff588c454d7a7af27a9e017a14a99a36e453be06cd17e51ce546734f7909c35d"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_051_view.mesh.gz",
+        "triangles": 1997,
+        "sha256": "df6ddff1e468c9538fb81c575bace00f29b1633edb2a2cfb6c15695923a9b4ec"
+      }
+    },
+    {
+      "tick": 52,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_052.mesh.gz",
+        "triangles": 7506,
+        "sha256": "5556ce10cae1e672046aa909c8da743733fe3aad309b86118a3961ee7ddded81"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_052_view.mesh.gz",
+        "triangles": 1654,
+        "sha256": "16672ff958d1929b3467451567979b43bb0459518f55267fda4af6cb4cb764db"
+      }
+    },
+    {
+      "tick": 53,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_053.mesh.gz",
+        "triangles": 7610,
+        "sha256": "4855c2ab719250e80f79bfb1ff3276e743094e8d0dc9431e3b85cdd35a64d8cc"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_053_view.mesh.gz",
+        "triangles": 1665,
+        "sha256": "56ff7548fe9707665dec92ef7fb449c13a9d1d0da14e6f2e438f9f68fd0da095"
+      }
+    },
+    {
+      "tick": 54,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_054.mesh.gz",
+        "triangles": 7677,
+        "sha256": "e8cfc99aec2600b350366de96203dd2d72520682ee599a970d1c4b61a8fc0c1d"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_054_view.mesh.gz",
+        "triangles": 1672,
+        "sha256": "21497dce8e087e557ab7c61d72d6cf0f89cf80399085c9f1b233b7c1e9c04d36"
+      }
+    },
+    {
+      "tick": 55,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_055.mesh.gz",
+        "triangles": 7756,
+        "sha256": "35539096fc969208b1ab9460d3568c09a5adee5b990b2132c6a63f485990a16e"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_055_view.mesh.gz",
+        "triangles": 1705,
+        "sha256": "d16371649fcb030535da1919df5a6c8b76174282e58ca6741677c56dd34877f9"
+      }
+    },
+    {
+      "tick": 56,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_056.mesh.gz",
+        "triangles": 7955,
+        "sha256": "28427e447302de7598eab23e3947e5e43cd4f1021730e4711e66d5367213f576"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_056_view.mesh.gz",
+        "triangles": 1752,
+        "sha256": "8e74629395a54382a89566e592fcb69ffaf36dabdcb2e7a3d370cbd2467d3be4"
+      }
+    },
+    {
+      "tick": 57,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_057.mesh.gz",
+        "triangles": 8158,
+        "sha256": "4c4823218c4a5b2160c86c067d663f739e039b99a996fefb159d24d207d96f74"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_057_view.mesh.gz",
+        "triangles": 1792,
+        "sha256": "c4bb65c6bf2d8169fb9855c75905782827bb556bca52d4346c969589fcbf17cf"
+      }
+    },
+    {
+      "tick": 58,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_058.mesh.gz",
+        "triangles": 8412,
+        "sha256": "e8722891c0d6274b1e40c275b0eb7fd517972191443b5690478e27f74843ded0"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_058_view.mesh.gz",
+        "triangles": 1846,
+        "sha256": "2b47d6bc307d8d05b016045a1020b9232798d522dd7a6f0de4e159a8455e0b1c"
+      }
+    },
+    {
+      "tick": 59,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_059.mesh.gz",
+        "triangles": 8482,
+        "sha256": "bc7bcc1e4b4c19cecbd40540755a510a746f155fc6bd22169d63ebbd1a0be07f"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_059_view.mesh.gz",
+        "triangles": 1875,
+        "sha256": "425a73cc32273d2a92086177bb37e0e3c1375fc1dc403fe16b345e9f0988fe1a"
+      }
+    },
+    {
+      "tick": 60,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_060.mesh.gz",
+        "triangles": 8380,
+        "sha256": "cfcbbc9404239a6881a806616f8da514cc07ecc92bbb250b1756bca466da6247"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_060_view.mesh.gz",
+        "triangles": 1844,
+        "sha256": "03bf560d899ddf1f995f6cadfbbbab27b413c9fe774b7bf0afa6aca1d9ff6eef"
+      }
+    },
+    {
+      "tick": 61,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_061.mesh.gz",
+        "triangles": 8344,
+        "sha256": "71b5357cf803fdbc6b8032da2018de00c6d3334607ba700484dd99e83fdfc35a"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_061_view.mesh.gz",
+        "triangles": 1852,
+        "sha256": "df51ab1892c09db875445bd3d1a9f1975d8a87c60e16afa3701bd723a4ca2a7a"
+      }
+    },
+    {
+      "tick": 62,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_062.mesh.gz",
+        "triangles": 8694,
+        "sha256": "e2e97850c047c8258c327bfe4aa391f4b9dd2dd728d46ec5ce8a6e96b0117ffa"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_062_view.mesh.gz",
+        "triangles": 1875,
+        "sha256": "818cc0ab9d3607dc54f2232cc933f25ecd96f3485095be8bf52bb49d9f042b29"
+      }
+    },
+    {
+      "tick": 63,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_063.mesh.gz",
+        "triangles": 9010,
+        "sha256": "07086b4736101c7315558affe10e0a454ef7a224b227f2f039303ac169f67139"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_063_view.mesh.gz",
+        "triangles": 1945,
+        "sha256": "ac2db3409d0d4b58e3269bc656e1d14afcb7b90e9d164ba1dfcf03315aa7f8cb"
+      }
+    },
+    {
+      "tick": 64,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_064.mesh.gz",
+        "triangles": 9257,
+        "sha256": "3a17dde8b789a26658e2662c7dd7d309fc0c322976b596e4750df726715dde0f"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_064_view.mesh.gz",
+        "triangles": 2032,
+        "sha256": "328f0761f24622239456640910d5536ff55fc0ea92908dd5ae78737337cfe471"
+      }
+    },
+    {
+      "tick": 65,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_065.mesh.gz",
+        "triangles": 10343,
+        "sha256": "a84777bdcdf0c1ef6549d0ab63573aeabd763a30bb83e6c5e9746093decb4757"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_065_view.mesh.gz",
+        "triangles": 2322,
+        "sha256": "2c1ef62fc0aa691e72d3e3723c29f0d9fcab2250d79123fa77306c5270dd7c76"
+      }
+    },
+    {
+      "tick": 66,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_066.mesh.gz",
+        "triangles": 10599,
+        "sha256": "1e3cf2d7a6560c483b2870d1b12a167030bae264d0123924a2703d699c8a4fe7"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_066_view.mesh.gz",
+        "triangles": 2462,
+        "sha256": "3aefd659f9b298c93605ef3f4addbb2abfbe25ff386a2c77f5444f9b38209716"
+      }
+    },
+    {
+      "tick": 67,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_067.mesh.gz",
+        "triangles": 10615,
+        "sha256": "bbdec09610b60c77f8b5c4268525514ff4fe25e08b5f507f4acbfd2ec6070183"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_067_view.mesh.gz",
+        "triangles": 2486,
+        "sha256": "7ba14168abbb97650438e1f8f08aa88ba3c51d1d928185946717f1f90d8506f3"
+      }
+    },
+    {
+      "tick": 68,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_068.mesh.gz",
+        "triangles": 10705,
+        "sha256": "77e691a64b72dabc3aa64b2c15a45d6916aefa3577d6a502c22c1d4cf40112a5"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_068_view.mesh.gz",
+        "triangles": 2534,
+        "sha256": "fff928c0a514c457d1b23c83a959f99ad335792a782b6c5bc7591e4b3d3e5551"
+      }
+    },
+    {
+      "tick": 69,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_069.mesh.gz",
+        "triangles": 10876,
+        "sha256": "a6e576ce41e70f8ecceb0df4e29878ffb59a8aa3f21d19c974aa8cb898d635c8"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_069_view.mesh.gz",
+        "triangles": 2525,
+        "sha256": "f9675335c3293539a3b2ec2f0fe9c8cbab8026d0a050ffe4a51286dc2fbd4ea8"
+      }
+    },
+    {
+      "tick": 70,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_070.mesh.gz",
+        "triangles": 11043,
+        "sha256": "af31bd41550600caa2ceda20fba5cc6d91d7c078540ab6b4fc1cea7c398e2e56"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_070_view.mesh.gz",
+        "triangles": 2550,
+        "sha256": "4cb3f32731d37db89fe697a0ebacc49be207ab706c7ebd329d48374864434466"
+      }
+    },
+    {
+      "tick": 71,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_071.mesh.gz",
+        "triangles": 11170,
+        "sha256": "483ddd4340962e9db1b96b8623f266a2eb4d694b021d09321b5a1e97e6cf4f0e"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_071_view.mesh.gz",
+        "triangles": 2567,
+        "sha256": "91038f2d713f775a04c0ba45240fcce4aeceb38899bcbe8b955571ca443e9e70"
+      }
+    },
+    {
+      "tick": 72,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_072.mesh.gz",
+        "triangles": 11232,
+        "sha256": "f36ce419273f3c4d6e80d61f9fbfeeb64babde989e676de1bf563b4c2c6fb363"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_072_view.mesh.gz",
+        "triangles": 2585,
+        "sha256": "6cc6d4c70f765204c2f336aea9da718d068abef233005d9049f5f8bfb4431026"
+      }
+    },
+    {
+      "tick": 73,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_073.mesh.gz",
+        "triangles": 11203,
+        "sha256": "5c39e5650a39090e0a4cc42677344a1bd6ed85a68f0552915903cb2de4ccb992"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_073_view.mesh.gz",
+        "triangles": 2591,
+        "sha256": "6e337dfddee630dcfca291a5c4b689b330056789ec1903ef0f52942fe28a0e56"
+      }
+    },
+    {
+      "tick": 74,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_074.mesh.gz",
+        "triangles": 11286,
+        "sha256": "f60325cc09e68237de050e97a4044517d11a2f1398bf7dd02f0ceefa6c5aaba8"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_074_view.mesh.gz",
+        "triangles": 2629,
+        "sha256": "1e19f433eb82f1f0acbf5a03cf4a60474cd447d4a3af9812506566424fda0afa"
+      }
+    },
+    {
+      "tick": 75,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_075.mesh.gz",
+        "triangles": 11442,
+        "sha256": "aa643cdd45ed405ec0d7412bd2c3662009eee8e5288b4745e6edf42112459e61"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_075_view.mesh.gz",
+        "triangles": 2643,
+        "sha256": "a802d3e0e41bcf45730ba4e061ef16a5b285c708ef185355c928745470b6eedf"
+      }
+    },
+    {
+      "tick": 76,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_076.mesh.gz",
+        "triangles": 11549,
+        "sha256": "f4e02e1bcb70b0292a0e3ba9dfab48e739e13cd78f7cd6d1222359be428e3c44"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_076_view.mesh.gz",
+        "triangles": 2680,
+        "sha256": "069a8687db473f0adb3bb7badfcab441a5e688e9fabb4f243dc89abd98814a0e"
+      }
+    },
+    {
+      "tick": 77,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_077.mesh.gz",
+        "triangles": 11637,
+        "sha256": "b80f6732decd049053eecde8e33c3a8bdad149b1dabc3a8e27b88782c922bd12"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_077_view.mesh.gz",
+        "triangles": 2685,
+        "sha256": "380f6f916bb8bcc0be7ebf643f7eca878ddf7db32db8af0d1f53933d4956a339"
+      }
+    },
+    {
+      "tick": 78,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_078.mesh.gz",
+        "triangles": 11645,
+        "sha256": "934934cf2d489818c54716addf86ad02301aaaec9918dfd01caa810f5263eade"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_078_view.mesh.gz",
+        "triangles": 2672,
+        "sha256": "a2fe60c898b6b22482cfbdeda2b80001e46648f9af52fd5c6febcfa1a8406182"
+      }
+    },
+    {
+      "tick": 79,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_079.mesh.gz",
+        "triangles": 11676,
+        "sha256": "205bfaa589b9d8e41855270ed6cfd3341e6d6a5689636a18ad83e947ed6a7a52"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_079_view.mesh.gz",
+        "triangles": 2685,
+        "sha256": "cff414cbd688e6b8fad8cbbc1b1d980440fd20ad4d2002c87f9f77f756411e81"
+      }
+    },
+    {
+      "tick": 80,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_080.mesh.gz",
+        "triangles": 11725,
+        "sha256": "ed8e86ef48af7608a7ba1d3650e8c31150ffee7b7a81887c57d5ff4c7aa96035"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_080_view.mesh.gz",
+        "triangles": 2689,
+        "sha256": "a93b7a9467df2358f2dc64b70fccaae1d995f76c958ec1ed905473fa6d6b65ac"
+      }
+    },
+    {
+      "tick": 81,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_081.mesh.gz",
+        "triangles": 11699,
+        "sha256": "4ee391b97fa6c273a7fd63eb1174b5c9e3f95adb52988f74f91d6e3544b75e09"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_081_view.mesh.gz",
+        "triangles": 2693,
+        "sha256": "bbf3c7179ad90ce3dc47c17e14fe0dbd60f4162276c5ce0ebaf47b40694962bf"
+      }
+    },
+    {
+      "tick": 82,
+      "detail": {
+        "path": "tnc:models/sanctum/awaken/face_082.mesh.gz",
+        "triangles": 12290,
+        "sha256": "4ac4d93cecf79455e2731b385b5773cb548a740db0bb9ce6c7c79481d7f32f2a"
+      },
+      "overview": {
+        "path": "tnc:models/sanctum/awaken/face_082_view.mesh.gz",
+        "triangles": 2825,
+        "sha256": "0efec3eb7740cb3048fc9be64feacaddbb07b4712ae255271b9bd02391cf5098"
+      }
+    }
+  ],
+  "switchBackAt": 82,
+  "duration": 120,
+  "tears": {
+    "bone": "head_tears",
+    "from": 72,
+    "to": 114,
+    "useOriginal": true
+  },
+  "atlas": "tnc:textures/entity/sanctum/sculpture.png",
+  "atlasSha256": "607c1eac39284d9bf0ffecfcc88066fbceb681f314e1edb99693781ff636dc77"
+}

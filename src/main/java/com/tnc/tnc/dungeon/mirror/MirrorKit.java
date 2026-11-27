@@ -36,7 +36,7 @@ public final class MirrorKit {
         var data=saved(player);
         if(data.contains(ESCROW)) {
             var old=data.getCompound(ESCROW);
-            if(old.hasUUID("Run") && old.getUUID("Run").equals(run)) return;
+            if(old.hasUUID("Run") && old.getUUID("Run").equals(run)){upgradeSupplies(player,old,run);return;}
             restore(player);
         }
         player.closeContainer();
@@ -45,13 +45,14 @@ public final class MirrorKit {
         original.putUUID("Run",run);
         original.put("Items",inv.save(new ListTag()));
         original.putInt("Selected",inv.selected);
+        original.putBoolean("ExpandedSupplies",true);
         data.put(ESCROW,original);
         original.put("Accessories",MirrorAccessories.suspend(player));
         player.stopUsingItem();
         inv.clearContent();
         Item[] bar={Items.IRON_SWORD,Items.IRON_AXE,Items.FISHING_ROD,Items.WATER_BUCKET,
                 Items.IRON_PICKAXE,Items.BOW,Items.GOLDEN_APPLE,Items.COOKED_BEEF,Items.ENDER_PEARL};
-        for(int slot=0;slot<bar.length;slot++) inv.setItem(slot,loan(bar[slot], slot==6?2:slot==7?4:1,run));
+        for(int slot=0;slot<bar.length;slot++) inv.setItem(slot,loan(bar[slot], slot==6||slot==8?10:slot==7?4:1,run));
         inv.setItem(9,loan(Items.ARROW,12,run));
         for(var slot:new EquipmentSlot[]{EquipmentSlot.HEAD,EquipmentSlot.CHEST,EquipmentSlot.LEGS,EquipmentSlot.FEET,EquipmentSlot.OFFHAND}) {
             Item item=switch(slot) {
@@ -62,6 +63,20 @@ public final class MirrorKit {
         }
         inv.selected=0;
         syncInventory(player);
+    }
+
+    private static void upgradeSupplies(ServerPlayer p,CompoundTag kit,UUID run){
+        if(kit.getBoolean("ExpandedSupplies"))return;
+        if(!kit.contains("ExtraApples")){
+            kit.putInt("ExtraApples",8);kit.putInt("ExtraPearls",9);
+        }
+        var apples=loan(Items.GOLDEN_APPLE,kit.getInt("ExtraApples"),run);
+        var pearls=loan(Items.ENDER_PEARL,kit.getInt("ExtraPearls"),run);
+        if(!apples.isEmpty())p.getInventory().add(apples);
+        if(!pearls.isEmpty())p.getInventory().add(pearls);
+        kit.putInt("ExtraApples",apples.getCount());kit.putInt("ExtraPearls",pearls.getCount());
+        kit.putBoolean("ExpandedSupplies",apples.isEmpty()&&pearls.isEmpty());
+        p.inventoryMenu.broadcastChanges();
     }
 
     private static ItemStack loan(Item item,int count,UUID run){

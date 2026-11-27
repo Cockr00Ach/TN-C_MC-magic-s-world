@@ -25,9 +25,18 @@ public final class MirrorMelee {
     private static final String BRAIN="TncEchoDuel";
     private static CompoundTag state(EchoDouble m){
         var t=m.getPersistentData();
-        if(!t.contains(BRAIN)){var s=new CompoundTag();s.putInt("Apples",2);s.putInt("Arrows",16);
-            s.putInt("Stone",16);s.putInt("Webs",2);s.putBoolean("Lava",true);t.put(BRAIN,s);}
-        return t.getCompound(BRAIN);
+        if(!t.contains(BRAIN)){
+            var s=new CompoundTag();s.putInt("Apples",64);s.putInt("Arrows",64);
+            s.putInt("Stone",64);s.putInt("Webs",8);s.putBoolean("Lava",true);
+            s.putBoolean("ExpandedSupplies",true);t.put(BRAIN,s);
+        }
+        var s=t.getCompound(BRAIN);
+        if(!s.getBoolean("ExpandedSupplies")){
+            s.putInt("Apples",s.getInt("Apples")+62);s.putInt("Arrows",s.getInt("Arrows")+48);
+            s.putInt("Stone",s.getInt("Stone")+48);s.putInt("Webs",s.getInt("Webs")+6);
+            s.putBoolean("ExpandedSupplies",true);
+        }
+        return s;
     }
     public static void cleanup(ServerLevel level,UUID run){MirrorTerrain.cleanup(level,run);}
     private static void hand(EchoDouble m,Item item){
@@ -89,22 +98,29 @@ public final class MirrorMelee {
             begin(m,s,"axe",26,Items.IRON_AXE);point(s,"Aim",p.getEyePosition());waitFor(s,"Axe",65);
             m.playSound(SoundEvents.ARMOR_EQUIP_IRON,.8f,.75f);return;
         }
-        if(pressure&&range<4&&ready(s,"Trap")&&(s.getBoolean("Lava")||s.getInt("Webs")>0)){
+        boolean closeTactic=sight&&range<3.6&&ready(s,"CloseTactic");
+        if(closeTactic){
+            waitFor(s,"CloseTactic",35);
+            if(canPillar(m,s)&&m.getRandom().nextFloat()<.45f){
+                waitFor(s,"Pillar",105);startRetreat(m,p,s,"pillar");return;
+            }
+        }
+        if((pressure||closeTactic)&&range<4&&ready(s,"Trap")&&(s.getBoolean("Lava")||s.getInt("Webs")>0)){
             var trap=p.blockPosition();
             if(sight && !p.isInWater() && s.getBoolean("Lava") && s.getInt("Webs")>0
                     && level.isEmptyBlock(trap) && level.isEmptyBlock(trap.above())){
                 begin(m,s,"web_lava",29,Items.COBWEB);
                 s.putLong("Snare",trap.asLong());s.putBoolean("Snared",false);
-                waitFor(s,"Trap",140);s.putInt("Pressure",0);return;
+                waitFor(s,"Trap",65);s.putInt("Pressure",0);return;
             }
             boolean useWeb=s.getInt("Webs")>0&&(m.isInWater()||p.isInWater()||!s.getBoolean("Lava")||m.getRandom().nextBoolean());
             begin(m,s,useWeb?"web":"lava",16,useWeb?Items.COBWEB:Items.LAVA_BUCKET);
             Vec3 away=flat(m.position().subtract(p.position()));
             point(s,"Trap",m.position().subtract(away.scale(.8)));point(s,"Away",away);
-            waitFor(s,"Trap",140);s.putInt("Pressure",0);return;
+            waitFor(s,"Trap",65);s.putInt("Pressure",0);return;
         }
         boolean corner=m.position().distanceToSqr(Vec3.atCenterOf(m.center()))>15*15&&pressure;
-        if(sight && ready(s,"Pearl") && s.getInt("PearlsUsed")<2 && m.onGround()
+        if(sight && ready(s,"Pearl") && s.getInt("PearlsUsed")<64 && m.onGround()
                 && range<20 && (range>=12 || p.getY()-m.getY()>2.4 && range>=5)){
             var toward=flat(p.position().subtract(m.position()));
             var landing=p.position().subtract(toward.scale(2.6));
@@ -113,14 +129,12 @@ public final class MirrorMelee {
             if(probe.getType()==HitResult.Type.BLOCK && probe.getDirection()==Direction.UP){
                 begin(m,s,"pearl",21,Items.ENDER_PEARL);
                 point(s,"Aim",Vec3.atBottomCenterOf(probe.getBlockPos().above()));
-                waitFor(s,"Pearl",180);return;
+                waitFor(s,"Pearl",120);return;
             }
         }
-        if(s.getInt("Stone")>=4&&ready(s,"Pillar")&&m.onGround()&&!m.isInWater()
-                &&(p.getY()-m.getY()>2.4||corner||(!sight&&now-s.getInt("SeenAt")>38&&range<15))){
-            begin(m,s,"pillar",65,Items.COBBLESTONE);var foot=m.blockPosition();
-            s.putLong("Foot",foot.asLong());s.putInt("Built",0);s.putInt("Goal",s.getInt("Stone")>=5&&m.getRandom().nextBoolean()?5:4);
-            waitFor(s,"Pillar",240);return;
+        if(canPillar(m,s)&&(p.getY()-m.getY()>2.4||corner||(!sight&&now-s.getInt("SeenAt")>38&&range<15))
+                && startPillar(level,m,s)){
+            waitFor(s,"Pillar",105);return;
         }
         if(sight)s.putInt("SeenAt",now);
         if((m.getY()>p.getY()+2.3||range>11)&&range<22&&sight&&s.getInt("Arrows")>0&&ready(s,"Bow")){
@@ -193,10 +207,9 @@ public final class MirrorMelee {
                 var feet=BlockPos.of(s.getLong("Snare"));
                 var terrain=MirrorTerrain.get(level);
                 face(m,Vec3.atCenterOf(age<10?feet:feet.above()));
-                if(age==7 && p.getBoundingBox().intersects(new AABB(feet)) && m.distanceTo(p)<4 && m.hasLineOfSight(p)
-                        && terrain.place(level,m.runId(),feet,"web",feet.asLong())){
-                    s.putBoolean("Snared",true);s.putInt("Webs",s.getInt("Webs")-1);
-                    m.swing(InteractionHand.MAIN_HAND);m.playSound(SoundEvents.WOOL_PLACE,.8f,1f);
+                if(age==7){
+                    var placed=layWeb(level,m,p,feet);
+                    if(placed!=null){s.putLong("Snare",placed.asLong());s.putBoolean("Snared",true);s.putInt("Webs",s.getInt("Webs")-1);}
                 }
                 if(age==10 && s.getBoolean("Snared")){
                     hand(m,Items.LAVA_BUCKET);m.action("lava_overhead",19);
@@ -213,9 +226,11 @@ public final class MirrorMelee {
                 face(m,point(s,"Trap"));if(age==2)m.push(point(s,"Away").x*.22,.04,point(s,"Away").z*.22);
                 if(age==7){
                     var pos=BlockPos.containing(point(s,"Trap"));
-                    if(MirrorTerrain.get(level).place(level,m.runId(),pos,move,pos.asLong())){
-                        if(move.equals("web"))s.putInt("Webs",s.getInt("Webs")-1);else s.putBoolean("Lava",false);
-                        m.swing(InteractionHand.MAIN_HAND);m.playSound(move.equals("web")?SoundEvents.WOOL_PLACE:SoundEvents.BUCKET_EMPTY_LAVA,.8f,1f);
+                    if(move.equals("web")){
+                        if(layWeb(level,m,p,pos)!=null)s.putInt("Webs",s.getInt("Webs")-1);
+                    }else if(MirrorTerrain.get(level).place(level,m.runId(),pos,"lava",pos.asLong())){
+                        s.putBoolean("Lava",false);
+                        m.swing(InteractionHand.MAIN_HAND);m.playSound(SoundEvents.BUCKET_EMPTY_LAVA,.8f,1f);
                     }
                 }
                 if(age==12)startRetreat(m,p,s,"turn");
@@ -227,7 +242,9 @@ public final class MirrorMelee {
                 if(age>=8&&(age>=s.getInt("End")||m.position().distanceToSqr(destination)<1.8||s.getString("After").equals("apple")&&!m.hasLineOfSight(p))){
                     if(s.getString("After").equals("apple")){
                         begin(m,s,"apple",32,Items.GOLDEN_APPLE);s.putBoolean("Interrupted",false);
-                    }else {face(m,p.getEyePosition());recover(m,s,4);}
+                    }else if(!s.getString("After").equals("pillar") || !startPillar(level,m,s)){
+                        face(m,p.getEyePosition());recover(m,s,4);
+                    }
                 }
             }
             case "apple"->{
@@ -249,6 +266,10 @@ public final class MirrorMelee {
                     a.pickup=AbstractArrow.Pickup.DISALLOWED;a.setBaseDamage(2);a.getPersistentData().putUUID("EchoArrow",m.runId());
                     level.addFreshEntity(a);s.putInt("Arrows",s.getInt("Arrows")-1);m.playSound(SoundEvents.ARROW_SHOOT,.9f,1f);
                 }
+                if(age==22&&s.getInt("PerchShots")>1&&s.getInt("Arrows")>0&&m.getY()>p.getY()+1.6&&m.hasLineOfSight(p)){
+                    s.putInt("PerchShots",s.getInt("PerchShots")-1);
+                    begin(m,s,"bow",24,Items.BOW);m.startUsingItem(InteractionHand.MAIN_HAND);
+                }else if(age==22)s.remove("PerchShots");
             }
             case "pearl"->{
                 var aim=point(s,"Aim");
@@ -284,10 +305,38 @@ public final class MirrorMelee {
         begin(m,s,"leap",23,Items.IRON_SWORD);s.putBoolean("JumpNext",false);s.putBoolean("Swung",false);
         s.putInt("Combos",s.getInt("Combos")+1);point(s,"Aim",p.getEyePosition());waitFor(s,"Sword",23);
     }
+    private static BlockPos layWeb(ServerLevel level,EchoDouble m,ServerPlayer p,BlockPos preferred){
+        var terrain=MirrorTerrain.get(level);
+        var current=p.blockPosition();
+        for(var at : java.util.List.of(current,preferred,current.north(),current.south(),current.west(),current.east())){
+            if(m.distanceToSqr(Vec3.atCenterOf(at))>25 || at.getY()<=m.center().getY()-1
+                    || Math.abs(at.getX()-m.center().getX())>20 || Math.abs(at.getZ()-m.center().getZ())>20)continue;
+            var ray=level.clip(new ClipContext(m.getEyePosition(),Vec3.atCenterOf(at),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,m));
+            if(ray.getType()!=HitResult.Type.MISS || !terrain.place(level,m.runId(),at,"web",at.asLong()))continue;
+            m.swing(InteractionHand.MAIN_HAND);m.playSound(SoundEvents.WOOL_PLACE,.8f,1f);
+            return at;
+        }
+        return null;
+    }
+    private static boolean canPillar(EchoDouble m,CompoundTag s){
+        return s.getInt("Stone")>=4&&s.getInt("Arrows")>0&&ready(s,"Pillar")&&m.onGround()&&!m.isInWater();
+    }
+    private static boolean tallClearance(ServerLevel level,BlockPos foot){
+        if(!level.getBlockState(foot.below()).isFaceSturdy(level,foot.below(),Direction.UP))return false;
+        for(int height=0;height<7;height++)if(!level.getBlockState(foot.above(height)).isAir())return false;
+        return true;
+    }
+    private static boolean startPillar(ServerLevel level,EchoDouble m,CompoundTag s){
+        var foot=m.blockPosition();
+        if(!m.onGround()||m.isInWater()||s.getInt("Stone")<4||!tallClearance(level,foot))return false;
+        begin(m,s,"pillar",85,Items.COBBLESTONE);
+        s.putLong("Foot",foot.asLong());s.putInt("Built",0);s.putInt("Goal",4);
+        return true;
+    }
     private static void pillar(ServerLevel level,EchoDouble m,ServerPlayer p,CompoundTag s,int age){
         int built=s.getInt("Built");var base=BlockPos.of(s.getLong("Foot"));var at=base.above(built);
         if(built>=s.getInt("Goal")){
-            if(m.onGround()){if(s.getInt("Arrows")>0){begin(m,s,"bow",24,Items.BOW);m.startUsingItem(InteractionHand.MAIN_HAND);}
+            if(m.onGround()){if(s.getInt("Arrows")>0){s.putInt("PerchShots",3);begin(m,s,"bow",24,Items.BOW);m.startUsingItem(InteractionHand.MAIN_HAND);}
                 else recover(m,s,6);}return;
         }
         if(Math.abs(m.getX()-base.getX()-.5)>.86||Math.abs(m.getZ()-base.getZ()-.5)>.86){recover(m,s,9);return;}
@@ -336,13 +385,14 @@ public final class MirrorMelee {
             var probe=m.level().clip(new ClipContext(end.add(0,2,0),end.add(0,-4,0),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,m));
             if(probe.getType()!=HitResult.Type.BLOCK||probe.getDirection()!=Direction.UP)continue;
             var at=probe.getBlockPos().above();
-            if(!m.level().getBlockState(at).isAir()||!m.level().getBlockState(at.above()).isAir())continue;
+            if(!m.level().getBlockState(at).isAir()||!m.level().getBlockState(at.above()).isAir()
+                    ||after.equals("pillar")&&!tallClearance((ServerLevel)m.level(),at))continue;
             var path=m.getNavigation().createPath(at,0);if(path==null||!path.canReach())continue;
             var v=Vec3.atBottomCenterOf(at);boolean covered=m.level().clip(new ClipContext(p.getEyePosition(),v.add(0,1.45,0),ClipContext.Block.COLLIDER,ClipContext.Fluid.NONE,m)).getType()==HitResult.Type.BLOCK;
-            double score=v.distanceTo(p.position())+(covered?7:0);
+            double score=v.distanceTo(p.position())+(covered?(after.equals("pillar")?-8:7):0);
             if(score>bestScore){best=v;bestScore=score;}
         }
-        begin(m,s,"flee",26,Items.IRON_SWORD);point(s,"Route",best);s.putString("After",after);
+        begin(m,s,"flee",after.equals("pillar")?38:26,Items.IRON_SWORD);point(s,"Route",best);s.putString("After",after);
     }
     private static void cover(ServerLevel l,EchoDouble m,ServerPlayer p,CompoundTag s){
         if(s.getInt("Stone")<2)return;

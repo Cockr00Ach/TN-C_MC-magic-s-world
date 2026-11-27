@@ -421,26 +421,13 @@ public final class FalseGodFight {
     }
     void failedGaze(ServerPlayer p) {
         if(!p.isAlive() || p.isSpectator() || DownedCombat.isDowned(p))return;
-        boolean faceToFace=directEyeContact(p);
-        if(faceToFace)SanctumGaze.send(p,body);
+        SanctumGaze.send(p,body);
         if(p.isCreative())return;
         hit(p,8,false);
         if(!p.isAlive() || DownedCombat.isDowned(p))return;
         p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN,52,5));
-        if(!faceToFace)p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.DARKNESS,64,0));
         p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.WEAKNESS,56,1));
         gazeBleeding.put(p.getUUID(),clock);
-    }
-    boolean directEyeContact(ServerPlayer p) {
-        double yaw=Math.toRadians(body.getYRot());
-        var front=new Vec3(-Math.sin(yaw),0,Math.cos(yaw));
-        var eyes=feet.add(0,52,0).add(front.scale(4));
-        var sight=eyes.subtract(p.getEyePosition());
-        var horizontal=p.position().subtract(feet).multiply(1,0,1).normalize();
-        if(front.dot(horizontal)<=.12 || p.getLookAngle().dot(sight.normalize())<Math.cos(Math.toRadians(15)))return false;
-        return level.clip(new net.minecraft.world.level.ClipContext(p.getEyePosition(),eyes,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,net.minecraft.world.level.ClipContext.Fluid.NONE,p))
-                .getType()==net.minecraft.world.phys.HitResult.Type.MISS;
     }
     private void tickBleeding() {
         for(var it=gazeBleeding.entrySet().iterator();it.hasNext();) {

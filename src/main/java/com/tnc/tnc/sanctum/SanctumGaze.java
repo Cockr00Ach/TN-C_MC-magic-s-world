@@ -6,6 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkDirection;
@@ -15,12 +16,14 @@ import net.minecraftforge.network.simple.SimpleChannel;
 public final class SanctumGaze {
     private SanctumGaze() {}
 
-    public record Shot(ResourceLocation level, int id, UUID boss, long start) {
+    public record Shot(ResourceLocation level, UUID boss, Vec3 anchor, float yaw) {
         void write(FriendlyByteBuf b) {
-            b.writeResourceLocation(level); b.writeVarInt(id); b.writeUUID(boss); b.writeLong(start);
+            b.writeResourceLocation(level); b.writeUUID(boss);
+            b.writeDouble(anchor.x); b.writeDouble(anchor.y); b.writeDouble(anchor.z); b.writeFloat(yaw);
         }
         static Shot read(FriendlyByteBuf b) {
-            return new Shot(b.readResourceLocation(), b.readVarInt(), b.readUUID(), b.readLong());
+            return new Shot(b.readResourceLocation(), b.readUUID(),
+                    new Vec3(b.readDouble(), b.readDouble(), b.readDouble()), b.readFloat());
         }
     }
 
@@ -34,8 +37,8 @@ public final class SanctumGaze {
     }
 
     public static void send(ServerPlayer victim, LivingEntity boss) {
-        if (victim.level() != boss.level() || !victim.isAlive() || victim.isSpectator()) return;
+        if (victim.level() != boss.level() || !victim.isAlive() || victim.isSpectator() || victim.connection == null) return;
         SanctumAppearance.CHANNEL.send(PacketDistributor.PLAYER.with(() -> victim),
-                new Shot(boss.level().dimension().location(), boss.getId(), boss.getUUID(), boss.level().getGameTime()));
+                new Shot(boss.level().dimension().location(), boss.getUUID(), boss.position(), boss.getYRot()));
     }
 }

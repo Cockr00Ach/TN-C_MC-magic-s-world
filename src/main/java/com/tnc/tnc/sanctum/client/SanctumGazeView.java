@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.tnc.tnc.sanctum.SanctumGaze;
 import static com.tnc.tnc.sanctum.SanctumTimings.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -33,27 +34,26 @@ public final class SanctumGazeView {
     private static final RenderType BONE = RenderType.entityCutoutNoCull(
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/bone_block_side.png"));
     private static final ResourceLocation BLOOD = ResourceLocation.fromNamespaceAndPath("tnc", "textures/effects/sanctum/gaze_blood.png");
+    private static final float FACE_CENTER_Y = 51.55F, FACE_FRONT_Z = 3.6F;
     private static SanctumGaze.Shot shot;
-    private static Vec3 anchor;
-    private static float initialYaw;
+    private static ClientLevel level;
+    private static long started;
     private SanctumGazeView() {}
 
     public static void start(SanctumGaze.Shot event) {
         var mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null || !mc.level.dimension().location().equals(event.level())
-                || !mc.player.isAlive() || mc.player.isSpectator() || mc.level.getGameTime() - event.start() >= GAZE_END
-                || !(mc.level.getEntity(event.id()) instanceof LivingEntity boss) || !boss.getUUID().equals(event.boss())) return;
+                || !mc.player.isAlive() || mc.player.isSpectator()) return;
         shot = event;
-        anchor = boss.position();
-        initialYaw = (float)Math.toRadians(-boss.getYRot());
+        level = mc.level;
+        started = level.getGameTime();
         SanctumMesh.request("bleeding");
     }
 
     private static float age(float partial) {
         var mc = Minecraft.getInstance();
-        if (shot == null || mc.level == null || mc.player == null || !mc.player.isAlive() || mc.player.isSpectator()
-                || !mc.level.dimension().location().equals(shot.level())) return GAZE_END;
-        return Math.max(0, mc.level.getGameTime() - shot.start() + partial);
+        if (shot == null || mc.level != level || mc.player == null || !mc.player.isAlive() || mc.player.isSpectator()) return GAZE_END;
+        return Math.max(0, level.getGameTime() - started + partial);
     }
 
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
@@ -61,7 +61,7 @@ public final class SanctumGazeView {
         if (age(0) >= GAZE_END) shot = null;
     }
 
-    @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut event) { shot = null; }
+    @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut event) { shot = null; level = null; }
 
     @SubscribeEvent public static void hand(RenderHandEvent event) {
         float t=age(event.getPartialTick());
@@ -90,15 +90,17 @@ public final class SanctumGazeView {
         var view = event.getCamera().getLookVector();
         var forward = new Vec3(view.x(), view.y(), view.z());
         var sideways = new Vec3(forward.z, 0, -forward.x).normalize();
-        var body = anchor.subtract(eye);
-        var natural = new Quaternionf().rotationY(initialYaw);
-        var home = body.add(rotated(natural, 0, 52.1, 3.6));
+        var body = shot.anchor().subtract(eye);
+        var natural = new Quaternionf().rotationY((float)Math.toRadians(-shot.yaw()));
+        var home = body.add(rotated(natural, 0, FACE_CENTER_Y, FACE_FRONT_Z));
         var joint = body.add(rotated(natural, 0, 48.6, .55));
         float release = 1 - ease(t, GAZE_STAIN_START, GAZE_HEAD_END);
         float cock = ease(t, 0, 5) * (1 - ease(t, 7, 16)) * release;
         float lunge = ease(t, 5, GAZE_CONTACT) * release;
-        // The last portion of the lunge is a short settle in front of the lens. Mouse control remains live.
-        var contact = forward.scale(2.75 + .32 * (1 - ease(t, 14, GAZE_CONTACT)));
+        // Frame the eye and the whole grin even when the slowness effect narrows field of view.
+        double distance = Math.max(4.65, 1.10 + 2.85 * event.getProjectionMatrix().m11());
+        double lift = Math.min(1.35, Math.max(0, shot.anchor().y + 2.70 - eye.y - forward.y * distance));
+        var contact = forward.scale(distance + .32 * (1 - ease(t, 14, GAZE_CONTACT))).add(0, lift, 0);
         var face = home.lerp(contact, lunge).add(sideways.scale(4.4 * cock + 8.1 * Math.sin(Math.PI * lunge)))
                 .add(0, 2.6 * cock - 1.8 * Math.sin(Math.PI * lunge), 0);
         var facing = face.scale(-1).normalize();
@@ -116,8 +118,8 @@ public final class SanctumGazeView {
         float aspect = mc.getMainRenderTarget().width / (float)Math.max(1, mc.getMainRenderTarget().height);
         float spread = Math.min(.64F, .28F + .25F * Math.max(0, aspect - 1.4F));
         var faceMatrix = new Matrix4f(viewMatrix).translate((float)face.x,(float)face.y,(float)face.z)
-                .rotate(skull).scale(1 + spread * pressure, 1 + .18F * pressure, 1)
-                .translate(0,-52.1F,-3.6F);
+                .rotate(skull).scale(1 + spread * pressure, 1 + .05F * pressure, 1)
+                .translate(0,-FACE_CENTER_Y,-FACE_FRONT_Z);
         model.draw(faceMatrix, BUFFERS, new SanctumPose("bleeding", "gaze_lunge", lunge, t, 0, false),
                 "head", LightTexture.pack(15,11));
         BUFFERS.endBatch();
@@ -176,8 +178,8 @@ public final class SanctumGazeView {
         float onset = .28F + .72F * ease(t, 0, 10);
         float fade = 1 - ease(t, 184, GAZE_END - GAZE_STAIN_START);
         var g = event.getGuiGraphics();
-        int a = Math.round((35 + 40 * (1 - ease(t, 20, 58))) * onset * fade);
-        if (a > 0) g.fill(0,0,w,h,a << 24 | 0x850C23);
+        int a = Math.round((106 + 30 * (1 - ease(t, 20, 58))) * (.64F + .36F * onset) * fade);
+        if (a > 0) g.fill(0,0,w,h,a << 24 | 0xAC0629);
         RenderSystem.enableBlend(); RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1,1,1,onset*fade);
         try {

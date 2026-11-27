@@ -24,8 +24,8 @@ public final class SanctumAppearance {
     public static final int TRUE_NAME_RED = 0xED303E;
     private static final String KEY = "TncSanctumAppearance";
     static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            ResourceLocation.fromNamespaceAndPath("tnc","sanctum_appearance"), () -> "2",
-            "2"::equals, "2"::equals);
+            ResourceLocation.fromNamespaceAndPath("tnc","sanctum_appearance"), () -> "3",
+            "3"::equals, "3"::equals);
 
     public record State(ResourceLocation dimension, int id, UUID uuid, String model,
                         String action, long started, int duration) {

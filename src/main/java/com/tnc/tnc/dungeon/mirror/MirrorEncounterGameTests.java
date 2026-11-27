@@ -92,6 +92,12 @@ public final class MirrorEncounterGameTests {
         inv.selected=3;var before=inv.save(new ListTag());
         MirrorKit.equip(p,run);MirrorKit.equip(p,run);
         h.assertTrue(p.getMainHandItem().is(Items.IRON_SWORD)&&p.getOffhandItem().is(Items.SHIELD),"Sword and shield actually equipped");
+        h.assertTrue(p.getInventory().countItem(Items.GOLDEN_APPLE)==10
+                && p.getInventory().countItem(Items.ENDER_PEARL)==10,"Both temporary consumables have a ten-item allowance");
+        inv.getItem(6).shrink(1);inv.getItem(8).shrink(1);
+        MirrorKit.equip(p,run);
+        h.assertTrue(p.getInventory().countItem(Items.GOLDEN_APPLE)==9
+                && p.getInventory().countItem(Items.ENDER_PEARL)==9,"Recurring equip cannot refill the combat supplies");
         for(var slot:List.of(EquipmentSlot.FEET,EquipmentSlot.LEGS,EquipmentSlot.CHEST,EquipmentSlot.HEAD))
             h.assertTrue(p.getItemBySlot(slot).getItem() instanceof ArmorItem armor && armor.getMaterial()==ArmorMaterials.IRON,"Full iron armour");
         p.getMainHandItem().setDamageValue(29);MirrorKit.restore(p);MirrorKit.restore(p);
